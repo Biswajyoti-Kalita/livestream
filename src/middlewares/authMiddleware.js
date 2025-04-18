@@ -32,7 +32,7 @@ const sessionMiddileware = async (req, res, next) => {
     //   if (!user) throw new Error("User not found");
     console.log("session middleware ");
     console.log(req.session);
-    if (true || req.session && req.session.user && req.session.user.id) {
+    if (req.session && req.session.user && req.session.user.id) {
       console.log("inside seessions");
       req.user = req.session.user;
       next();
