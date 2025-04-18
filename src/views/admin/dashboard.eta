@@ -1,0 +1,6 @@
+<%~ includeFile("partials/header")%>
+<%~ includeFile("partials/nav")%>
+<%~ includeFile("partials/sidebar", {page: "dashboard"})%>
+
+
+<%~ includeFile("partials/footer")%>

@@ -1,3 +1,9 @@
 node_modules
 package-lock.json
 .env
+.media
+media
+.DS_Store
+src/.DS_Store
+uploads
+database.sqlite
