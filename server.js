@@ -54,7 +54,7 @@ app.set("view cache", false);
 app.set("view engine", "eta");
 
 app.get("/", (req,res) => {
-  req.redirect("/client/meeting");
+  res.redirect("/client/meeting");
 })
 
 // Start the server
