@@ -29,6 +29,10 @@ module.exports = function (sequelize, DataTypes) {
     start_time: {
       type: DataTypes.TIME
     },
+    timezone: {
+      type: DataTypes.STRING,
+      defaultValue: "Asia/Riyadh"
+    },
     actual_users: {
       type: DataTypes.TEXT,
       defaultValue: "[]"

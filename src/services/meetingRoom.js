@@ -5,7 +5,7 @@ exports.initializeRoom = (meetingId) => {
     // Initialize room if needed
     if (!meetingRooms[meetingId]) {
         meetingRooms[meetingId] = new Set();
-      }
+    }
 }
 exports.deleteRoom = (meetingId) => {
     delete meetingRooms[meetingId];

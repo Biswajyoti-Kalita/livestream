@@ -5,16 +5,48 @@
   <title>Nextbroadcast Media</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
+  <!-- Add Heroicons (for icons) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.min.css">
   <style>
-    /* Your existing custom styles can be kept */
+    /* Custom styles */
     .hide {
-        display: none !important;
+      display: none !important;
+    }
+    
+    .chat-collapsed {
+      width: 60px !important;
+      transition: width 0.3s ease;
+    }
+    
+    .chat-expanded {
+      transition: width 0.3s ease;
+    }
+    
+    .video-with-chat {
+      transition: width 0.3s ease;
+    }
+    
+    .video-full {
+      transition: width 0.3s ease;
+    }
+    
+    /* Chat message animations */
+    @keyframes messageIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message {
+      animation: messageIn 0.3s ease forwards;
+    }
+    
+    /* Video container enhancements */
+    .video-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
   </style>
-  <!-- Remove Bootstrap if you're fully switching to Tailwind -->
-  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script> -->
-    <!-- Add Socket.IO client library -->
+  <!-- Add Socket.IO client library -->
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body class="bg-gray-900 text-white">
@@ -23,55 +55,116 @@
       <h1 class="text-3xl font-bold text-center">Nextbroadcast Media</h1>
     </header>
 
+    <!-- Meeting Information Section -->
+    <div id="meetingInfoSection" class="hidden mb-6 bg-gray-800 rounded-lg p-6 max-w-3xl mx-auto">
+      <h2 id="meetingTitle" class="text-2xl font-bold mb-2">Loading meeting...</h2>
+      <p id="meetingDescription" class="text-gray-300 mb-4">Please wait while we fetch the meeting details.</p>
+      <!-- Agenda will be dynamically inserted here when available -->
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div class="bg-gray-700 p-3 rounded-lg">
+          <span class="text-gray-400 text-sm">Start Date:</span>
+          <div id="meetingDate" class="font-semibold">-</div>
+        </div>
+        <div class="bg-gray-700 p-3 rounded-lg">
+          <span class="text-gray-400 text-sm">Start Time:</span>
+          <div id="meetingTime" class="font-semibold">-</div>
+        </div>
+      </div>
+      
+      <!-- Improved Countdown Timer -->
+      <div id="timeRemainingSection" class="mt-6 text-center">
+        <h3 class="text-xl font-bold text-white mb-3">Starting In</h3>
+        <div class="flex justify-center gap-3 text-center">
+          <div class="bg-gradient-to-b from-blue-800 to-blue-900 rounded-lg p-4 w-24 shadow-lg">
+            <span id="remainingDays" class="text-3xl font-bold block text-white">00</span>
+            <span class="text-sm text-gray-300">Days</span>
+          </div>
+          <div class="bg-gradient-to-b from-blue-800 to-blue-900 rounded-lg p-4 w-24 shadow-lg">
+            <span id="remainingHours" class="text-3xl font-bold block text-white">00</span>
+            <span class="text-sm text-gray-300">Hours</span>
+          </div>
+          <div class="bg-gradient-to-b from-blue-800 to-blue-900 rounded-lg p-4 w-24 shadow-lg">
+            <span id="remainingMinutes" class="text-3xl font-bold block text-white">00</span>
+            <span class="text-sm text-gray-300">Minutes</span>
+          </div>
+          <div class="bg-gradient-to-b from-blue-800 to-blue-900 rounded-lg p-4 w-24 shadow-lg">
+            <span id="remainingSeconds" class="text-3xl font-bold block text-white">00</span>
+            <span class="text-sm text-gray-300">Seconds</span>
+          </div>
+        </div>
+        <p class="mt-4 text-gray-300">The meeting will begin automatically when the countdown ends.</p>
+      </div>
+    </div>
+
     <!-- Main Content Area with Flexbox Layout -->
-    <div class="flex flex-col md:flex-row gap-4" id="streamDiv" >
+    <div class="flex flex-col md:flex-row gap-4" id="streamDiv">
       <!-- Left Side - Video Section -->
-      <div class="w-full md:w-2/3">
+      <div id="videoSection" class="w-full md:w-2/3 video-with-chat transition-all duration-300">
         <div id="streamInfo" class="mb-4">
           <div id="status" class="text-xl font-semibold">🔵 Waiting for stream...</div>
         </div>
 
         <div id="video-container" class="hidden">
-          <video id="video" loop="false" controls autoplay class="w-full rounded-lg border-4 border-gray-700"></video>
+          <video id="video" loop="false" controls autoplay class="max-h-[600px] w-full rounded-lg border-4 border-gray-700 video-shadow"></video>
         </div>
       </div>
 
-      <!-- Right Side - Chat Section -->
-      <div id="chatSection" class="w-full md:w-1/3 bg-gray-800 rounded-lg p-4 flex flex-col h-[500px]">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Live Chat</h2>
-          <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">
+      <!-- Right Side - Chat Section with Collapse Button -->
+      <div id="chatSection" class="w-full md:w-1/3 bg-gray-800 rounded-lg flex flex-col max-h-[600px] chat-expanded relative transition-all duration-300">
+        <!-- Collapse/Expand Button - Positioned on the left edge -->
+        <button id="toggleChatBtn" class="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white w-8 h-20 rounded-l-lg flex items-center justify-center shadow-lg hover:bg-gray-700 z-10 focus:outline-none">
+          <i class="ri-arrow-right-s-line text-xl" id="chatCollapseIcon"></i>
+        </button>
+        
+        <!-- Chat Header -->
+        <div id="chatHeader" class="flex justify-between items-center p-4 border-b border-gray-700">
+          <h2 class="text-xl font-bold">Chat</h2>
+          <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm flex items-center">
+            <i class="ri-user-line mr-1"></i>
             <span id="activeUsers">0</span> active
           </div>
         </div>
         
-        <!-- Chat Messages Container -->
-        <div id="chatMessages" class="flex-grow overflow-y-auto mb-4 space-y-3 p-2">
-          <!-- Messages will be added here via JavaScript -->
-          <div class="message bg-gray-700 p-2 rounded-lg">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-green-400">System:</span>
+        <!-- Chat Content -->
+        <div id="chatContent" class="flex-grow mb-2 flex flex-col p-4" style="max-height: 90%">
+          <!-- Chat Messages Container -->
+          <div id="chatMessages" class="flex-grow overflow-y-auto mb-4 space-y-3 p-2 scrollbar-thin scrollbar-thumb-gray-600">
+            <!-- Messages will be added here via JavaScript -->
+            <div class="message bg-gray-700 p-3 rounded-lg">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-green-400">System:</span>
+              </div>
+              <p>Welcome to the live stream! Chat with others while watching.</p>
             </div>
-            <p>Welcome to the live stream! Chat with others while watching.</p>
+          </div>
+          
+          <!-- Chat Input Form -->
+          <div class="mt-auto">
+            <form id="messageForm" class="flex gap-2">
+              <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Type your message..." 
+                class="flex-grow bg-gray-700 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <button 
+                type="submit" 
+                class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center"
+              >
+                <i class="ri-send-plane-fill mr-1"></i> Send
+              </button>
+            </form>
           </div>
         </div>
         
-        <!-- Chat Input Form -->
-        <div class="mt-auto">
-          <form id="messageForm" class="flex gap-2">
-            <input 
-              type="text" 
-              id="messageInput" 
-              placeholder="Type your message..." 
-              class="flex-grow bg-gray-700 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-            <button 
-              type="submit" 
-              class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
-            >
-              Send
-            </button>
-          </form>
+        <!-- Collapsed Chat View -->
+        <div id="collapsedChatView" class="hidden h-full flex flex-col items-center justify-center p-2">
+          <i class="ri-chat-3-line text-2xl mb-2 text-blue-400"></i>
+          <div class="writing-vertical transform rotate-90 text-sm text-gray-400 whitespace-nowrap">Live Chat</div>
+          <div class="mt-4 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mt-auto mb-4">
+            <span id="collapsedActiveUsers">0</span>
+          </div>
         </div>
       </div>
     </div>
@@ -81,48 +174,88 @@
       <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-xl font-bold mb-4">Join Meeting</h2>
         <div class="space-y-4">
-          <div>
-            <label for="meetingIdControlInput" class="block text-sm font-medium mb-1">Meeting ID</label>
-            <input 
-              type="text" 
-              class="w-full bg-gray-700 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              id="meetingIdControlInput" 
-              placeholder="Enter meeting ID"
-            >
-          </div>
-          <div class="flex items-center justify-between">
-            <button 
-              class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg" 
-              onclick="join()"
-            >
-              Join
-            </button>
-            <span id="meetingStatus" class="text-sm text-gray-300"></span>
-          </div>
+          <form action="/client/meeting">
+            <div>
+              <label for="meetingIdControlInput" class="block text-sm font-medium mb-1">Meeting ID</label>
+              <input 
+                type="text" 
+                class="w-full bg-gray-700 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                id="meetingIdControlInput" 
+                placeholder="Enter meeting ID"
+                name="id"
+              >
+            </div>
+            <div class="flex items-center justify-between">
+              <button 
+                class="bg-blue-600 mt-4 hover:bg-blue-700 px-6 py-2 rounded-lg" 
+                type="submit"
+              >
+                Join
+              </button>
+              <span id="meetingStatus" class="text-sm text-gray-300"></span>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-
   <script>
-    // Keep your existing JavaScript
+    // Existing JavaScript
     let meetingId = "<%= it.meeting ? it.meeting.uuid : '' %>";
     let streamUrl = `/live/${meetingId}/index.m3u8`;
     const video = document.getElementById('video');
     const videoContainer = document.getElementById('video-container');
     const status = document.getElementById('status');
-    let timer = null, meetingTimer = null;
+    let timer = null, meetingTimer = null, countdownTimer = null;
     let isStreaming = false;
+    let meetingData = null;
+    let meetingStartTime = null;
 
     // Chat functionality
     const messageForm = document.getElementById('messageForm');
     const messageInput = document.getElementById('messageInput');
     const chatMessages = document.getElementById('chatMessages');
     const activeUsersElement = document.getElementById('activeUsers');
+    const collapsedActiveUsers = document.getElementById('collapsedActiveUsers');
+    const toggleChatBtn = document.getElementById('toggleChatBtn');
+    const chatSection = document.getElementById('chatSection');
+    const chatContent = document.getElementById('chatContent');
+    const collapsedChatView = document.getElementById('collapsedChatView');
+    const videoSection = document.getElementById('videoSection');
+    const chatCollapseIcon = document.getElementById('chatCollapseIcon');
     
+    let isChatCollapsed = false;
     let activeUsers = 0; // Initial count
     let socket; // WebSocket connection
+
+    // Handle chat collapsing
+    toggleChatBtn.addEventListener('click', function() {
+      isChatCollapsed = !isChatCollapsed;
+      
+      if (isChatCollapsed) {
+        // Collapse chat
+        chatSection.classList.remove('chat-expanded');
+        chatSection.classList.add('chat-collapsed');
+        chatContent.classList.add('hidden');
+        collapsedChatView.classList.remove('hidden');
+        videoSection.classList.remove('video-with-chat');
+        videoSection.classList.add('video-full', 'md:w-[calc(100%-80px)]');
+        chatCollapseIcon.classList.remove('ri-arrow-right-s-line');
+        chatCollapseIcon.classList.add('ri-arrow-left-s-line');
+      } else {
+        // Expand chat
+        chatSection.classList.remove('chat-collapsed');
+        chatSection.classList.add('chat-expanded');
+        chatContent.classList.remove('hidden');
+        collapsedChatView.classList.add('hidden');
+        videoSection.classList.add('video-with-chat');
+        videoSection.classList.remove('video-full', 'md:w-[calc(100%-80px)]');
+        videoSection.classList.add('md:w-2/3');
+        chatCollapseIcon.classList.add('ri-arrow-right-s-line');
+        chatCollapseIcon.classList.remove('ri-arrow-left-s-line');
+      }
+    });
 
     function showStreamDiv(){
         document.getElementById("streamDiv").classList.remove("hidden");
@@ -132,13 +265,15 @@
     function showNonStreamDiv(){
         document.getElementById("streamDiv").classList.add("hidden");
         document.getElementById("nonStreamDiv").classList.remove("hidden");    
-    }
+    }    
 
     if(meetingId){
       document.getElementById("meetingIdControlInput").value = meetingId;
     }
+    
     showNonStreamDiv();
 
+    // The rest of your JavaScript remains the same
     function getPublicPath(){
       console.log("get public path");
       fetch(`/client/event/public?id=${meetingId}`).then(res => res.json()).then(res => {
@@ -150,28 +285,159 @@
     }
 
     function checkMeeting(){
-        fetch(`/client/event/${meetingId}`).then((res) =>res.json()).then((res) => {
-            console.log(res);
-            const status = parseInt(res['status']);
-            if(status == 0){
-              console.log("meeting has not yet started");
-              document.getElementById("meetingStatus").innerHTML = `Meeting has not yet started`
-            }else if(status == 1) {
-              if(meetingTimer)
-                clearInterval(meetingTimer);
-              timer = setInterval(checkStream, 5000);
-              showStreamDiv();
-              initializeChat(); // Connect to chat when meeting is active
-            }else if(status == 2){
-              if(meetingTimer)
-                clearInterval(meetingTimer);
-              showStreamDiv();
-              videoContainer.classList.remove('hidden');
-              document.getElementById("streamInfo").classList.add("hidden");
-              getPublicPath();
-              initializeChat(); // Connect to chat when meeting is recorded
-            }
-        });
+      fetch(`/client/event/${meetingId}`)
+        .then((res) => res.json())
+        .then((res) => {
+          console.log(res);
+          meetingData = res;
+          updateMeetingInfo(res);
+          
+          const status = parseInt(res['status']);
+          if(status == 0){
+            console.log("meeting has not yet started");
+            document.getElementById("meetingStatus").innerHTML = `Meeting has not yet started`;
+            showMeetingCountdown(res);
+            
+            // Show meeting info section but hide stream
+            document.getElementById("meetingInfoSection").classList.remove("hidden");
+            document.getElementById("streamDiv").classList.add("hidden");
+            //showNonStreamDiv();
+          } else if(status == 1) {
+            if(meetingTimer)
+              clearInterval(meetingTimer);
+            if(countdownTimer)
+              clearInterval(countdownTimer);
+            document.getElementById("timeRemainingSection").classList.add("hidden");
+            timer = setInterval(checkStream, 5000);
+            
+            // Keep meeting info visible but also show stream
+            document.getElementById("meetingInfoSection").classList.remove("hidden");
+            showStreamDiv();
+            initializeChat(); // Connect to chat when meeting is active
+          } else if(status == 2){
+            if(meetingTimer)
+              clearInterval(meetingTimer);
+            if(countdownTimer)
+              clearInterval(countdownTimer);
+            document.getElementById("timeRemainingSection").classList.add("hidden");
+            
+            // Keep meeting info visible but also show stream
+            document.getElementById("meetingInfoSection").classList.add("hidden");
+            showStreamDiv();
+            videoContainer.classList.remove('hidden');
+            document.getElementById("streamInfo").classList.add("hidden");
+            getPublicPath();
+            initializeChat(); // Connect to chat when meeting is recorded
+          }
+      })
+      .catch(err => {
+        console.error("Error fetching meeting data:", err);
+      });
+    }
+
+    function updateMeetingInfo(data) {
+      // Update meeting info elements
+      document.getElementById("meetingTitle").textContent = data.title || "Untitled Meeting";
+      document.getElementById("meetingDescription").textContent = data.description || "No description available";
+      
+      // Add agenda if available
+      if (data.agenda) {
+        const agendaElement = document.getElementById("meetingAgenda") || document.createElement("p");
+        agendaElement.id = "meetingAgenda";
+        agendaElement.className = "text-gray-300 mt-2";
+        agendaElement.innerHTML = `<strong>Agenda:</strong> ${data.agenda}`;
+        
+        // If element doesn't exist yet, add it after the description
+        if (!document.getElementById("meetingAgenda")) {
+          const descriptionElement = document.getElementById("meetingDescription");
+          descriptionElement.parentNode.insertBefore(agendaElement, descriptionElement.nextSibling);
+        }
+      }
+      
+      // Format and display dates
+      if (data.start_date && data.start_time && data.timezone) {
+        // Use Luxon to handle timezones
+        const { DateTime } = luxon;
+        
+        // Combine date and time with timezone
+        const meetingDateTime = DateTime.fromFormat(
+          `${data.start_date} ${data.start_time}:00`, // Add seconds since API doesn't include them
+          "yyyy-MM-dd HH:mm:ss", 
+          { zone: data.timezone }
+        );
+        
+        // Store for countdown
+        meetingStartTime = meetingDateTime;
+        
+        // Convert to local timezone for display
+        const localDateTime = meetingDateTime.toLocal();
+        
+        // Format for display
+        document.getElementById("meetingDate").textContent = localDateTime.toFormat("EEE, MMM d, yyyy");
+        document.getElementById("meetingTime").textContent = localDateTime.toFormat("h:mm a") + 
+          ` (${localDateTime.offsetNameShort})`;
+      } else {
+        document.getElementById("meetingDate").textContent = "Not specified";
+        document.getElementById("meetingTime").textContent = "Not specified";
+      }
+    }
+
+    // Existing functions for meeting countdown, etc.
+    function showMeetingCountdown(data) {
+    //debugger
+      // Only proceed if we have valid date/time data
+      if (!data.start_date || !data.start_time || !data.timezone) {
+        document.getElementById("timeRemainingSection").classList.add("hidden");
+        return;
+      }
+      
+      // Always show the countdown section when status is 0 (not started)
+      document.getElementById("timeRemainingSection").classList.remove("hidden");
+      
+      // Create the DateTime object if not already created
+      if (!meetingStartTime) {
+        const { DateTime } = luxon;
+        meetingStartTime = DateTime.fromFormat(
+          `${data.start_date} ${data.start_time}:00`, // Add seconds since API doesn't include them
+          "yyyy-MM-dd HH:mm:ss", 
+          { zone: data.timezone }
+        );
+      }
+      
+      // Update countdown immediately
+      updateCountdown();
+      
+      // Set up interval to update countdown
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = setInterval(updateCountdown, 1000);
+    }
+
+
+    function updateCountdown() {
+      console.log("update coutn dount");      
+  //debugger
+      if (!meetingStartTime) return;
+
+      const { DateTime } = luxon;
+      const now = DateTime.local();
+      
+      // Calculate the difference
+      const diff = meetingStartTime.diff(now, ['days', 'hours', 'minutes', 'seconds']);
+      
+      console.log("diff.milliseconds ",diff.milliseconds);
+      // If meeting time is in the past, stop countdown and check meeting again
+      if (diff.milliseconds <= 0) {
+        clearInterval(countdownTimer);
+        document.getElementById("timeRemainingSection").classList.add("hidden");
+        //checkMeeting(); // Check if meeting status has changed
+        return;
+      }
+      
+      // Update the countdown display with padded values
+      document.getElementById("remainingDays").textContent = String(Math.floor(diff.days)).padStart(2, '0');
+      document.getElementById("remainingHours").textContent = String(Math.floor(diff.hours)).padStart(2, '0');
+      document.getElementById("remainingMinutes").textContent = String(Math.floor(diff.minutes)).padStart(2, '0');
+      document.getElementById("remainingSeconds").textContent = String(Math.floor(diff.seconds)).padStart(2, '0');
     }
 
     function checkStream() {
@@ -208,17 +474,7 @@
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = streamUrl;
       }
-    }
-
-    function join(){
-        const meetingInputValue = document.getElementById("meetingIdControlInput").value;
-        if(meetingInputValue){
-            meetingId = meetingInputValue;         
-            checkMeeting();
-            checkMeetingWithInterval();
-        }else {
-            alert("Please enter the meeting ID");
-        }
+      video.play();
     }
 
     // Initialize WebSocket connection for chat
@@ -235,11 +491,17 @@
       socket.on('users_update', (data) => {
         activeUsers = data.count;
         activeUsersElement.textContent = activeUsers;
+        collapsedActiveUsers.textContent = activeUsers;
       });
       
       // Listen for chat messages
       socket.on('chat_message', (data) => {
         addChatMessage(data.username, data.message, data.timestamp);
+        
+        // If chat is collapsed and we receive a message, flash the chat icon
+        if (isChatCollapsed) {
+          flashChatIcon();
+        }
       });
       
       // Handle connection errors
@@ -257,7 +519,16 @@
         addSystemMessage("Reconnected to chat");
         socket.emit('join_room', meetingId);
       });
+    }
 
+    function flashChatIcon() {
+      // Flash the chat icon when collapsed and new messages arrive
+      const icon = collapsedChatView.querySelector('i');
+      icon.classList.add('text-blue-500', 'animate-pulse');
+      
+      setTimeout(() => {
+        icon.classList.remove('text-blue-500', 'animate-pulse');
+      }, 2000);
     }
 
     function getPreviousMessage(){
@@ -273,18 +544,18 @@
 
     // Add a chat message to the UI
     function addChatMessage(username, message, timestamp) {
-    console.log("addChatMessage ", {username, message, timestamp});
+      console.log("addChatMessage ", {username, message, timestamp});
       const messageElement = document.createElement('div');
-      messageElement.className = 'message bg-gray-700 p-2 rounded-lg';
+      messageElement.className = 'message bg-gray-700 p-3 rounded-lg mb-2';
       
       const time = new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       
       messageElement.innerHTML = `
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between mb-1">
           <span class="font-bold text-blue-400">${username}</span>
           <span class="text-xs text-gray-400">${time}</span>
         </div>
-        <p>${message}</p>
+        <p class="break-words">${message}</p>
       `;
       
       chatMessages.appendChild(messageElement);
@@ -294,7 +565,7 @@
     // Add a system message to the chat
     function addSystemMessage(message) {
       const messageElement = document.createElement('div');
-      messageElement.className = 'message bg-gray-700 p-2 rounded-lg';
+      messageElement.className = 'message bg-gray-700 p-3 rounded-lg mb-2';
       
       messageElement.innerHTML = `
         <div class="flex items-center gap-2">
@@ -321,10 +592,8 @@
       }
     });
     
-
-
     function checkMeetingWithInterval(){
-      
+    //debugger
       if(meetingTimer)
         clearInterval(meetingTimer);
 
@@ -333,7 +602,11 @@
       }    
     }
 
-    // Poll every 5 seconds if meeting ID exists
+    // Call checkMeeting immediately to show meeting info
+    if(meetingId) {
+      checkMeeting();
+      checkMeetingWithInterval();
+    }
   </script>
 </body>
 </html>

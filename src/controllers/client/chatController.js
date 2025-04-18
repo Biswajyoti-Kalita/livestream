@@ -39,17 +39,19 @@ exports.getActiveUsers = async (req,res) => {
   const { meetingId } = req.params;
 
   if (!hasRoom(meetingId)) {
-    return res.status(200).json({ count: 0 });
+    return res.status(200).send({ count: 0 });
   }
 
-  res.status(200).json({ count: getRoomSize(meetingId)});
+  res.status(200).send({ count: getRoomSize(meetingId)});
 }
 
 exports.getMessages = async (req,res) => {
   const { meetingId } = req.params;
 
   const messages = await db.chat.findAll({
-    event_id: meetingId
+    where: {
+      event_id: meetingId
+    }
   })
   
   res.status(200).send({messages});
