@@ -394,7 +394,7 @@
         if (event.lengthComputable) {
           const percentComplete = (event.loaded / event.total) * 100;
           console.log(`Upload progress: ${percentComplete.toFixed(2)}%`);
-          document.getElementById("uploadProgress").innerHTML = `Uploading file ${percentComplete}%`
+          document.getElementById("uploadProgress").innerHTML = `Uploading file ${percentComplete.toFixed(2)}%`
           // You can update your UI here to show the progress
         }
       });
