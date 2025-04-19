@@ -35,7 +35,7 @@ exports.addUserToRoom = async (meetingId, userId) => {
     // meetingRooms[meetingId].add(userId);
 }
 
-exports.removeUserToRoom = async (meetingId, userId) => {
+exports.removeUserFromRoom = async (meetingId, userId) => {
     await db.meeting.destroy({
         where: {
             meeting_id: meetingId,

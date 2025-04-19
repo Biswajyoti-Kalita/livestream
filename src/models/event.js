@@ -40,7 +40,8 @@ module.exports = function (sequelize, DataTypes) {
     added_users: {
       type: DataTypes.TEXT,
       defaultValue: "[]"
-    },    status: {
+    },    
+    status: {
       type: DataTypes.INTEGER,
       defaultValue: 0 // Pending, In-progress, Completed
     }

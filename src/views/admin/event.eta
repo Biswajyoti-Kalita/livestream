@@ -2,7 +2,7 @@
 <%~ includeFile("partials/nav")%>
 <%~ includeFile("partials/sidebar", {page: "events"})%>
 <%
-    const columns = ["Slno", "UUID", "Meeting Link", "Filepath", "Agenda", "Description", "Start Date", "Start Time", "Status", "Action"];
+    const columns = ["Slno", "UUID", "Meeting Link", "Filepath", "Agenda", "Description", "Start Date", "Start Time", "Timezone",  "Status", "Action"];
     const limitOptions = [10, 25, 50, 100]; // Options for the limit dropdown
     let currentPage = 1; // Initialize current page
     let totalPages = 1; // Initialize total pages (will be updated by API)
@@ -78,13 +78,16 @@
                 </button>
             </div>
             <!-- Modal body -->
-            <form id="chat" class="p-4 md:p-5">
+            <div id="chat" class="p-4 md:p-5">
               <div class="text-white">
   
                 <div id="chatSection" class="w-full bg-gray-800 rounded-lg p-4 flex flex-col h-[500px]">
                   <div class="flex justify-between items-center mb-4">
                     <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">
                       <span id="activeUsers">0</span> active
+                    </div>
+                    <div>
+                      <input type="number" class="text-black w-[100px] rounded-md mr-2 border-2" id="addUserRoomNum" placeholder="50 or -50" /><button onclick="addUser()">Add</button>
                     </div>
                   </div>
                   
@@ -97,7 +100,6 @@
                   </div>
                   
                   <div class="mt-auto">
-                    <form id="messageForm" class="flex gap-2">
                       <input 
                         type="text" 
                         id="messageInput" 
@@ -107,15 +109,15 @@
                       <button 
                         type="submit" 
                         class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
+                        onclick="sendMessage()"
                       >
                         Send
                       </button>
-                    </form>
                   </div>
                 </div>
 
               </div>
-          </form>
+          </div>
         </div>
     </div>
 </div>
@@ -168,10 +170,37 @@
 
 
                 <div class="col-span-2">
+                  <label for="addTimezone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Timezone</label>
+                  <select type="time" id="addTimezone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="start date" >
+
+                    <option value="UTC">UTC</option>
+                    <option value="Africa/Cairo">Africa/Cairo (UTC+2)</option>
+                    <option value="Africa/Johannesburg">Africa/Johannesburg (UTC+2)</option>
+                    <option value="America/Chicago">America/Chicago (UTC-6)</option>
+                    <option value="America/New_York">America/New_York (UTC-5)</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles (UTC-8)</option>
+                    <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
+                    <option value="Asia/Kolkata">Asia/Kolkata (UTC+5:30)</option>
+                    <option value="Asia/Jakarta">Asia/Jakarta (UTC+7)</option>
+                    <option value="Asia/Riyadh" selected>Asia/Riyadh (UTC+3)</option>
+                    <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (UTC+10)</option>
+                    <option value="Europe/Berlin">Europe/Berlin (UTC+1)</option>
+                    <option value="Europe/London">Europe/London (UTC+0)</option>
+                    <option value="Pacific/Auckland">Pacific/Auckland (UTC+12)</option>
+                  </select>
+
+                </div>
+
+
+                <div class="col-span-2">
                   <label for="addFilePath" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">File</label>
                   <input type="hidden" id="addFilePath" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                   <input type="file" id="addFilePathFile" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                 </div>
+
+
 
 
               </div>
@@ -207,21 +236,67 @@
           <!-- Modal body -->
           <form id="editForm" class="p-4 md:p-5">
             <div class="grid gap-4 mb-4 grid-cols-2">
-              <div class="col-span-2">
-                <label for="editVersion" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Version</label>
-                <input type="text" id="editVersion" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Version" required />
-              </div>
-              <div class="col-span-2">
-                  <label for="editDbChanged" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">DB Changed</label>
-                  <select type="text" id="editDbChanged" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="db_changed"  >
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
+
+
+                <div class="col-span-2">
+                  <label for="editAgenda" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Agenda</label>
+                  <input type="text" id="editAgenda" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="agenda" />
+                </div>
+                <div class="col-span-2">
+                  <label for="editTitle" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
+                  <input type="text" id="editTitle" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Title" required />
+                </div>
+                <div class="col-span-2">
+                  <label for="editDescription" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                  <input type="text" id="editDescription" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Description"  />
+                </div>
+
+
+                <div class="col-span-2">
+                  <label for="editStartDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
+                  <input type="date" id="editStartDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="start date"  />
+                </div>
+
+
+                <div class="col-span-2">
+                  <label for="editStartTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Time</label>
+                  <input type="time" id="editStartTime" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="start date"  />
+                </div>
+
+
+                <div class="col-span-2">
+                  <label for="editTimezone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Timezone</label>
+                  <select type="time" id="editTimezone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="start date" >
+
+                    <option value="UTC">UTC</option>
+                    <option value="Africa/Cairo">Africa/Cairo (UTC+2)</option>
+                    <option value="Africa/Johannesburg">Africa/Johannesburg (UTC+2)</option>
+                    <option value="America/Chicago">America/Chicago (UTC-6)</option>
+                    <option value="America/New_York">America/New_York (UTC-5)</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles (UTC-8)</option>
+                    <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
+                    <option value="Asia/Kolkata">Asia/Kolkata (UTC+5:30)</option>
+                    <option value="Asia/Jakarta">Asia/Jakarta (UTC+7)</option>
+                    <option value="Asia/Riyadh" selected>Asia/Riyadh (UTC+3)</option>
+                    <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (UTC+10)</option>
+                    <option value="Europe/Berlin">Europe/Berlin (UTC+1)</option>
+                    <option value="Europe/London">Europe/London (UTC+0)</option>
+                    <option value="Pacific/Auckland">Pacific/Auckland (UTC+12)</option>
                   </select>
-              </div>
-              <div class="col-span-2">
-                <label for="editDescription" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-                <textarea id="editDescription" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" /></textarea>
-              </div>
+
+                </div>
+
+
+                <div class="col-span-2">
+                  <label for="editFilePath" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">File</label>
+                  <input type="hidden" id="editFilePath" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                  <input type="file" id="editFilePathFile" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                </div>
+
+
+
             </div>
             <input type="hidden" id="editEventId" value="" />
             <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -231,7 +306,10 @@
       </div>
   </div>
 </div>
-  <script src="/socket.io/socket.io.js"></script>
+
+
+
+<script src="/socket.io/socket.io.js"></script>
 
 
 <script>
@@ -243,6 +321,8 @@
   const editForm = document.getElementById("editForm");
   const editFormModalCloseBtn = document.getElementById('editFormModalCloseBtn');
   const editFormModalBtn = document.getElementById('editFormModalBtn');
+
+
   const chatModalCloseBtn = document.getElementById('chatModalCloseBtn');
   const chatModalBtn = document.getElementById('chatModalBtn');
   const limitSelect = document.getElementById("limit");
@@ -263,7 +343,6 @@
 
 
   // Chat functionality
-  const messageForm = document.getElementById('messageForm');
   const messageInput = document.getElementById('messageInput');
   const chatMessages = document.getElementById('chatMessages');
   const activeUsersElement = document.getElementById('activeUsers');
@@ -393,10 +472,11 @@
                     <td class="px-6 py-3">${app['description'] ? app['description'] : ''}</td>
                     <td class="px-6 py-3">${app['start_date'] ? app['start_date'] : ''}</td>
                     <td class="px-6 py-3">${app['start_time'] ? app['start_time'] : ''}</td>
+                    <td class="px-6 py-3">${app['timezone'] ? app['timezone'] : ''}</td>
                     <td class="px-6 py-3">${ ['Pending','In-progress','Completed'][app['status']] }</td>
                     <td class="px-6 py-3">
-                      <button class="mx-2 p-2 cursor-p" style="display: contents;" onclick="startEvent(${app['id']})">Start Event</button>
-                      <button class="mx-2 p-2 cursor-p" onclick="startChat(${app['id']})">Chat</button>
+                      <button class="mx-2 p-2 cursor-p bg-red-800 text-nowrap mb-2 rounded-md text-white" onclick="startEvent(${app['id']})">Start Event</button>
+                      <button class="mx-2 p-2 cursor-p bg-blue-800 text-nowrap mb-2 rounded-md text-white" onclick="startChat(${app['id']})">Chat</button>
                       <button class="mx-2 p-2 cursor-p" onclick="editEvent(${app['id']})">Edit</button>
                       <button class="mx-2 p-2 cursor-p" onclick="deleteEvent(${app['id']})">Delete</button>
                     </td>
@@ -440,7 +520,8 @@
       getActiveUsers();
       // Connect to Socket.IO
       
-      socket = io('/chat');
+      if(socket == null)
+        socket = io('/chat');
       
       // Join the meeting room
       socket.emit('join_room', meetingId);
@@ -531,18 +612,36 @@
     }
 
     // Handle message form submission
-    messageForm?.addEventListener('submit', function(e) {
-      e.preventDefault();
+    function sendMessage(){
       
       const message = messageInput.value.trim();
       if (message && socket && socket.connected) {
         // Send via Socket.IO
-        socket.emit('chat_message', { message: message });
+        socket.emit('chat_message', { message: message, isAdmin: true });
         
         // Clear input after sending
         messageInput.value = '';
       }
-    });    
+    
+    }
+
+
+  function addUser(){
+    const url = `/admin/api/adduser`;
+    fetch(url, {
+      method:"POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        meetingId,
+        num: +document.getElementById("addUserRoomNum").value
+      })
+    })
+    .then(res => res.json())
+    .then(res => {
+        document.getElementById("addUserRoomNum").value = 0;
+    })
+  }
+
 
   function startChat(id) {
     chatModalBtn.click();
@@ -590,9 +689,13 @@
           });
         }else {
           document.getElementById("editEventId").value = id;
-          document.getElementById("editVersion").value = res["version"];
-          document.getElementById("editDbChanged").value = res["db_changed"];
+          document.getElementById("editAgenda").value = res["agenda"];
+          document.getElementById("editTitle").value = res["title"];
           document.getElementById("editDescription").value = res["description"];
+          document.getElementById("editStartDate").value = res["start_date"];
+          document.getElementById("editStartTime").value = res["start_time"];
+          document.getElementById("editTimezone").value = res["timezone"];
+          document.getElementById("editFilePath").value = res["filepath"];
         }
       }
     });
@@ -640,6 +743,7 @@
         description: document.getElementById("addDescription").value,
         start_date: document.getElementById("addStartDate").value,
         start_time: document.getElementById("addStartTime").value,
+        timezone: document.getElementById("addTimezone").value,
         filepath: document.getElementById("addFilePath").value,
       })
     })
@@ -665,7 +769,8 @@
       clearFieldData("addDescription");
       clearFieldData("addStartDate");
       clearFieldData("addStartTime");
-      clearFieldData("addTaddFilePathitle");
+      clearFieldData("addTimezone");
+      clearFieldData("addFilePath");
       addFormModalCloseBtn.click();
       fetchData();
     });
@@ -680,9 +785,13 @@
       method:"PUT",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        version: document.getElementById("editVersion").value,
-        db_changed: +document.getElementById("editDbChanged").value,
+        agenda: document.getElementById("editAgenda").value,
+        title: document.getElementById("editTitle").value,
         description: document.getElementById("editDescription").value,
+        start_date: document.getElementById("editStartDate").value,
+        start_time: document.getElementById("editStartTime").value,
+        timezone: document.getElementById("editTimezone").value,
+        filepath: document.getElementById("editFilePath").value,
       })
     })
     .then(res => res.json())

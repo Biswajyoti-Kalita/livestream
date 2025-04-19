@@ -1,7 +1,10 @@
 const { Op } = require("sequelize");
 const db = require("./../../models");
-const { addUserToRoom } = require("../../services/meetingRoom");
+const { addUserToRoom, getUsers, removeUserFromRoom, getRoomSize } = require("../../services/meetingRoom");
 const { chatNamespace } = require("../../services/websocketService");
+
+const { v4: uuidv4 } = require('uuid');
+
 
 exports.chatView = async (req, res) => {
   const backends = await db.backend.findAll();
@@ -177,17 +180,53 @@ exports.deleteChat = async (req, res) => {
 
 
 exports.addTempUser = async (req,res) => {
-  const {meetingId, num} = req.body;
+  let {meetingId, id,  num} = req.body;
+  console.log({meetingId, num});
+
+  if(id){
+    const event = await db.event.findOne({
+      where: {
+        id
+      }
+    })
+
+    if(event){
+      meetingId = event["uuid"];
+    }
+
+  }
+  
+  
   const userCount = getRoomSize(meetingId);
   const temp_user_id = uuidv4().substring(5);
-  for(let i=0; i< num;i++){
-    setTimeout(() => {
-      addUserToRoom(meetingId,"temp_user_"+ temp_user_id +i)
-      chatNamespace.to(meetingId).emit('users_update', { count: userCount + i + 1 });
-    }, 500, i)
+
+
+  if(num < 0){
+    const tempUsers = getUsers(meetingId);
+    console.log({tempUsers})
+    for(let i=0; i< (num * -1); i++){
+
+      for(const item of tempUsers){
+        console.log(" item ", item);
+        if(item.startsWith("temp_user")){
+          removeUserFromRoom(meetingId, item);
+          break;
+        }
+      }
+    }
+    chatNamespace.to(meetingId).emit('users_update', { count: getRoomSize(meetingId) });
+
+  }else {
+    for(let i=0; i< num;i++){
+      setTimeout(() => {
+        addUserToRoom(meetingId,"temp_user_"+ temp_user_id +i)
+        chatNamespace.to(meetingId).emit('users_update', { count: userCount + i + 1 });
+      }, 500, i)
+    }  
   }
+
   return res.send({
     status:"success",
-    message: "Added count"
+    message: "Count updated"
   })
 }

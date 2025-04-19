@@ -93,7 +93,7 @@
             <span class="text-sm text-gray-300">Seconds</span>
           </div>
         </div>
-        <p class="mt-4 text-gray-300">The meeting will begin automatically when the countdown ends.</p>
+        <p class="mt-4 text-gray-300">The meeting will begin automatically when the countdown ends or when it starts.</p>
       </div>
     </div>
 
@@ -106,7 +106,7 @@
         </div>
 
         <div id="video-container" class="hidden">
-          <video id="video" loop="false" controls autoplay class="max-h-[600px] w-full rounded-lg border-4 border-gray-700 video-shadow"></video>
+          <video id="video" loop="false" muted controls autoplay class="max-h-[600px] w-full rounded-lg border-4 border-gray-700 video-shadow"></video>
         </div>
       </div>
 
@@ -228,6 +228,7 @@
     let isChatCollapsed = false;
     let activeUsers = 0; // Initial count
     let socket; // WebSocket connection
+    let intervalTimeout = 5000;
 
     // Handle chat collapsing
     toggleChatBtn.addEventListener('click', function() {
@@ -291,7 +292,7 @@
           console.log(res);
           meetingData = res;
           updateMeetingInfo(res);
-          
+          document.getElementById("nonStreamDiv").classList.add("hidden");
           const status = parseInt(res['status']);
           if(status == 0){
             console.log("meeting has not yet started");
@@ -308,10 +309,10 @@
             if(countdownTimer)
               clearInterval(countdownTimer);
             document.getElementById("timeRemainingSection").classList.add("hidden");
-            timer = setInterval(checkStream, 5000);
+            timer = setInterval(checkStream, intervalTimeout);
             
             // Keep meeting info visible but also show stream
-            document.getElementById("meetingInfoSection").classList.remove("hidden");
+            document.getElementById("meetingInfoSection").classList.add("hidden");
             showStreamDiv();
             initializeChat(); // Connect to chat when meeting is active
           } else if(status == 2){
@@ -384,7 +385,7 @@
 
     // Existing functions for meeting countdown, etc.
     function showMeetingCountdown(data) {
-    //debugger
+      //debugger
       // Only proceed if we have valid date/time data
       if (!data.start_date || !data.start_time || !data.timezone) {
         document.getElementById("timeRemainingSection").classList.add("hidden");
@@ -426,12 +427,20 @@
       
       console.log("diff.milliseconds ",diff.milliseconds);
       // If meeting time is in the past, stop countdown and check meeting again
-      if (diff.milliseconds <= 0) {
+      if (diff.milliseconds <= 0 && diff.minutes <=0 && diff.hours <=0 && diff.days <= 0) {
         clearInterval(countdownTimer);
         document.getElementById("timeRemainingSection").classList.add("hidden");
         //checkMeeting(); // Check if meeting status has changed
         return;
       }
+
+      if( diff.days > 0 || diff.hours > 0 || diff.minutes > 30 ){
+        intervalTimeout = 1000 * 60 * 60;
+      }else {
+        intervalTimeout = 5000;
+      }
+
+      checkMeetingWithInterval();
       
       // Update the countdown display with padded values
       document.getElementById("remainingDays").textContent = String(Math.floor(diff.days)).padStart(2, '0');
@@ -593,12 +602,13 @@
     });
     
     function checkMeetingWithInterval(){
-    //debugger
+      console.log(" checkMeetingWithInterval " ,intervalTimeout);
+      //debugger
       if(meetingTimer)
         clearInterval(meetingTimer);
 
       if(meetingId) {
-          meetingTimer = setInterval(checkMeeting, 5000);
+          meetingTimer = setInterval(checkMeeting, intervalTimeout);
       }    
     }
 

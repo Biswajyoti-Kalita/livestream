@@ -2,7 +2,7 @@
 const db = require("../../models");
 const { chatNamespace } = require("../../services/websocketService");
 
-const { initializeRoom, addUserToRoom, getRoomSize, hasRoom, removeUserToRoom, deleteRoom } = require("./../../services/meetingRoom");
+const { initializeRoom, addUserToRoom, getRoomSize, hasRoom, removeUserFromRoom, deleteRoom } = require("./../../services/meetingRoom");
 
 // API endpoint to send messages (alternative to socket)
 exports.sendMessage = async (req,res) => {
@@ -50,7 +50,7 @@ exports.getMessages = async (req,res) => {
 
   const messages = await db.chat.findAll({
     where: {
-      event_id: meetingId
+      meeting_id: meetingId
     }
   })
   

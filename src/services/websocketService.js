@@ -9,7 +9,7 @@ const io = new Server(server);
 
 
 const db = require("./../models");
-const { initializeRoom, addUserToRoom, getRoomSize, hasRoom, removeUserToRoom, deleteRoom } = require("./../services/meetingRoom");
+const { initializeRoom, addUserToRoom, getRoomSize, hasRoom, removeUserFromRoom, deleteRoom, removeUserFromAllRoom } = require("./../services/meetingRoom");
 
 // Socket.IO namespace for chat
 const chatNamespace = io.of('/chat');
@@ -32,8 +32,18 @@ chatNamespace.on('connection', (socket) => {
     // Initialize room
     initializeRoom(meetingId);
     
+    // Remove user from all other room
+    const rooms = removeUserFromAllRoom(userId);
+    if(rooms.length){
+      rooms.forEach((mId) => {
+        console.log("send users_update ",mId)
+        chatNamespace.to(mId).emit('users_update', { count: getRoomSize(mId) });
+      })
+    }
+
     // Add user to room
     addUserToRoom(meetingId, userId);
+    
     
     // Update user count
     const userCount = getRoomSize(meetingId);
@@ -49,13 +59,14 @@ chatNamespace.on('connection', (socket) => {
     db.chat.create({
       message: data.message,
       meeting_id: meetingId,
-      user_uid: username
+      user_uid: data.isAdmin ? "Admin" : username,
+      is_admin: data.isAdmin ? true : false
     }).then(res => console.log("message added ")).catch(err => console.log(err));
 
 
     // Broadcast message to all users in the room
     chatNamespace.to(meetingId).emit('chat_message', {
-      username: username,
+      username: data.isAdmin ? "Admin" : username,
       message: data.message,
       timestamp: new Date().toISOString()
     });
@@ -72,7 +83,7 @@ chatNamespace.on('connection', (socket) => {
     if (meetingId && hasRoom(meetingId)) {
 
       // Remove user from room
-      removeUserToRoom(meetingId, userId);
+      removeUserFromRoom(meetingId, userId);
       
       // If room is empty, clean up
       if (getRoomSize(meetingId) === 0) {
