@@ -429,18 +429,24 @@
       // If meeting time is in the past, stop countdown and check meeting again
       if (diff.milliseconds <= 0 && diff.minutes <=0 && diff.hours <=0 && diff.days <= 0) {
         clearInterval(countdownTimer);
-        document.getElementById("timeRemainingSection").classList.add("hidden");
+        //document.getElementById("timeRemainingSection").classList.add("hidden");
         //checkMeeting(); // Check if meeting status has changed
         return;
       }
 
       if( diff.days > 0 || diff.hours > 0 || diff.minutes > 30 ){
-        intervalTimeout = 1000 * 60 * 60;
+        if(intervalTimeout === 5000){
+          intervalTimeout = 1000 * 60 * 60;
+          checkMeetingWithInterval();
+        }
       }else {
-        intervalTimeout = 5000;
+        if(intervalTimeout === 1000 * 60 * 60){
+          intervalTimeout = 5000;
+          checkMeetingWithInterval();
+        }
       }
 
-      checkMeetingWithInterval();
+      //checkMeetingWithInterval();
       
       // Update the countdown display with padded values
       document.getElementById("remainingDays").textContent = String(Math.floor(diff.days)).padStart(2, '0');
