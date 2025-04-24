@@ -161,8 +161,8 @@
     </header> */ %>
     <!-- Meeting Information Section -->
     <div id="meetingInfoSection" class="hidden mb-8 bg-white rounded-xl p-6 max-w-3xl mx-auto border border-nb-border shadow-lg">
-      <h2 id="meetingTitle" class="text-2xl font-bold mb-2 text-nb-dark">Loading meeting...</h2>
-      <p id="meetingDescription" class="text-nb-text-light mb-6">Please wait while we fetch the meeting details.</p>
+      <h2 id="meetingTitle" class="text-2xl font-bold mb-2 text-nb-dark capitalize">Loading meeting...</h2>
+      <p id="meetingDescription" class="text-nb-text-light mb-6 capitalize">Please wait while we fetch the meeting details.</p>
       <!-- Agenda will be dynamically inserted here when available -->
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -180,20 +180,20 @@
       <div id="timeRemainingSection" class="mt-8 text-center">
         <h3 class="text-xl font-bold text-nb-dark mb-5">Starting In</h3>
         <div class="flex justify-center gap-3 text-center">
-          <div class="countdown-item rounded-xl p-5 w-24">
-            <span id="remainingDays" class="text-3xl font-bold block text-nb-dark">00</span>
+          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
+            <span id="remainingDays" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
             <span class="text-sm text-nb-text-light mt-1">Days</span>
           </div>
-          <div class="countdown-item rounded-xl p-5 w-24">
-            <span id="remainingHours" class="text-3xl font-bold block text-nb-dark">00</span>
+          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
+            <span id="remainingHours" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
             <span class="text-sm text-nb-text-light mt-1">Hours</span>
           </div>
-          <div class="countdown-item rounded-xl p-5 w-24">
-            <span id="remainingMinutes" class="text-3xl font-bold block text-nb-dark">00</span>
+          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
+            <span id="remainingMinutes" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
             <span class="text-sm text-nb-text-light mt-1">Minutes</span>
           </div>
-          <div class="countdown-item rounded-xl p-5 w-24">
-            <span id="remainingSeconds" class="text-3xl font-bold block text-nb-dark">00</span>
+          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
+            <span id="remainingSeconds" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
             <span class="text-sm text-nb-text-light mt-1">Seconds</span>
           </div>
         </div>
