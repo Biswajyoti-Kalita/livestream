@@ -3,6 +3,7 @@ const db = require("./../../models");
 const path = require("path");
 const fs = require("fs");
 const { startStreaming } = require("../../services/ffmpegService");
+const { chatNamespace } = require("../../services/websocketService");
 
 exports.eventView = async (req, res) => {
   return res.render("admin/event");
@@ -183,6 +184,10 @@ exports.startEvent = async  (req, res) => {
       }
     })
     // delete the .ts files
+
+    // Broadcast message to all clients in the room
+    chatNamespace.to(event["uuid"]).emit('event_ended', {});
+    
   });
 
   await db.event.update({

@@ -11,6 +11,14 @@ module.exports = function (sequelize, DataTypes) {
     meeting_id: {
       type: DataTypes.STRING
     },
+    name: {
+      type: DataTypes.STRING
+    },
+    organization: {
+      type: DataTypes.STRING
+    },
+  }, {
+    timestamps: true
   });
   return meeting;
 };

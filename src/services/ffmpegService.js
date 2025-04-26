@@ -15,12 +15,18 @@ module.exports = {
         '-re',
         '-i', inputFile,
         '-c:v', 'libx264',
+        '-preset', 'veryfast',  // Faster encoding, lower latency
+        '-tune', 'zerolatency', // Optimize for streaming
         '-c:a', 'aac',
         '-f', 'hls',
-        '-hls_time', '2',
-        '-hls_list_size', '3',
-        '-hls_flags', 'delete_segments',
-        '-hls_playlist_type', 'event',
+        '-hls_time', '2',       // Keep segments short
+        '-hls_list_size', '5',  // Keep only 5 segments in the playlist
+        '-hls_delete_threshold', '1', // Delete segments quickly
+        '-hls_flags', 'delete_segments+append_list+omit_endlist+program_date_time+discont_start',
+        '-start_number', '0',   // Start numbering at 0
+        '-hls_segment_type', 'mpegts', // Use MPEG-TS for segments
+        '-hls_allow_cache', '0',
+        '-hls_playlist_type', 'event', // More appropriate for live
         outputFile
       ];
     

@@ -9,7 +9,7 @@ const io = new Server(server);
 
 
 const db = require("./../models");
-const { initializeRoom, addUserToRoom, getRoomSize, hasRoom, removeUserFromRoom, deleteRoom, removeUserFromAllRoom } = require("./../services/meetingRoom");
+const { initializeRoom, addUserToRoom, getRoomSize, hasRoom, removeUserFromRoom, deleteRoom, removeUserFromAllRoom, getUserDetails } = require("./../services/meetingRoom");
 
 // Socket.IO namespace for chat
 const chatNamespace = io.of('/chat');
@@ -23,8 +23,8 @@ chatNamespace.on('connection', (socket) => {
   let username = `User_${userId.substring(0, 5)}`;
   
   // Handle joining a meeting room
-  socket.on('join_room', (roomId) => {
-    meetingId = roomId;
+  socket.on('join_room', (data) => {
+    meetingId = data.meetingId;
     
     // Join the room
     socket.join(meetingId);
@@ -42,7 +42,7 @@ chatNamespace.on('connection', (socket) => {
     }
 
     // Add user to room
-    addUserToRoom(meetingId, userId);
+    addUserToRoom(meetingId, userId, data.organization, data.name);
     
     
     // Update user count
@@ -55,18 +55,24 @@ chatNamespace.on('connection', (socket) => {
   socket.on('chat_message', (data) => {
     if (!meetingId) return;
     
+    const userDetails = getUserDetails(userId);
 
     db.chat.create({
       message: data.message,
       meeting_id: meetingId,
       user_uid: data.isAdmin ? "Admin" : username,
-      is_admin: data.isAdmin ? true : false
+      name: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['name']) ? userDetails['name']: username,
+      organization: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['organization']) ? userDetails['organization']: '',
+      is_admin: data.isAdmin ? true : false,
+      user_id: userId,
     }).then(res => console.log("message added ")).catch(err => console.log(err));
+
 
 
     // Broadcast message to all users in the room
     chatNamespace.to(meetingId).emit('chat_message', {
-      username: data.isAdmin ? "Admin" : username,
+      username: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['name']) ? userDetails['name']: username,
+      organization: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['organization']) ? userDetails['organization']: '',
       message: data.message,
       timestamp: new Date().toISOString()
     });

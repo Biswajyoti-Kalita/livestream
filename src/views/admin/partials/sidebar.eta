@@ -13,7 +13,13 @@
                     <span class="ms-3">Event</span>
                 </a>
             </li>
-            <!--
+
+            <li class="<%= it.page == 'meeting' ? ' dark:text-white bg-gray-100 dark:bg-gray-700': '' %>" >
+                <a href="/admin/meetings" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span class="ms-3">Meeting User's</span>
+                </a>
+            </li>            <!--
             <li class="<%= it.page == 'frontends' ? ' dark:text-white bg-gray-100 dark:bg-gray-700': '' %>" >
                 <a href="/admin/frontends" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                     <i class="fa-solid fa-apps"></i>

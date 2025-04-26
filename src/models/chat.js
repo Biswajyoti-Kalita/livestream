@@ -8,6 +8,12 @@ module.exports = function (sequelize, DataTypes) {
     message: {
       type: DataTypes.TEXT
     },    
+    name: {
+      type: DataTypes.STRING
+    },
+    organization: {
+      type: DataTypes.STRING
+    },
     user_uid: {
       type: DataTypes.STRING
     },
@@ -18,6 +24,8 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       defaultValue: 0 // No, Yes
     },
+  },{
+    timestamps: true
   });
 
   chat.associate = function(models) {

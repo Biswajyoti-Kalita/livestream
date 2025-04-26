@@ -99,7 +99,7 @@
                     </div>
                   </div>
                   
-                  <div class="mt-auto">
+                  <div class="mt-auto flex gap-1">
                       <input 
                         type="text" 
                         id="messageInput" 
@@ -207,7 +207,7 @@
               <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                   Add
               </button>
-              <span id="uploadProgress"></span>
+              <span id="addUploadProgress" class="text-white"></span>
           </form>
         </div>
     </div>
@@ -297,11 +297,25 @@
 
 
 
+                <div class="col-span-2">
+                  <label for="editStatus" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+                  <select id="editStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="0">Pending</option>
+                    <option value="1">In Progress</option>
+                    <option value="2">Completed</option>
+                  </select>
+                </div>
+
+
+
+
             </div>
             <input type="hidden" id="editEventId" value="" />
             <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 edit
             </button>
+            <span id="editUploadProgress" class="text-white"></span>
+
         </form>
       </div>
   </div>
@@ -384,7 +398,7 @@
 
   }
 
-  async function uploadFileWithProgress(file) {
+  async function uploadFileWithProgress(file, progressId) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       const formData = new FormData();
@@ -394,7 +408,7 @@
         if (event.lengthComputable) {
           const percentComplete = (event.loaded / event.total) * 100;
           console.log(`Upload progress: ${percentComplete.toFixed(2)}%`);
-          document.getElementById("uploadProgress").innerHTML = `Uploading file ${percentComplete.toFixed(2)}%`
+          document.getElementById(progressId).innerHTML = `Uploading file ${percentComplete.toFixed(2)}%`
           // You can update your UI here to show the progress
         }
       });
@@ -575,7 +589,7 @@
         console.log("messages ",res, );
         if(res && res['messages'] && Array.isArray(res['messages']) && res['messages'].length){
           for(let i=0;i<res['messages'].length;i++){
-             addChatMessage(res['messages'][i]['user_uid'], res['messages'][i]['message'], new Date(res['messages'][i]['createdAt']))
+             addChatMessage(res['messages'][i]['name'] ? res['messages'][i]['name'] + ' ('+ res['messages'][i]['organization'] + ')' : res['messages'][i]['user_uid'], res['messages'][i]['message'], new Date(res['messages'][i]['createdAt']))
           }
         }
       });
@@ -696,6 +710,7 @@
           document.getElementById("editStartTime").value = res["start_time"];
           document.getElementById("editTimezone").value = res["timezone"];
           document.getElementById("editFilePath").value = res["filepath"];
+          document.getElementById("editStatus").value = res["status"];
         }
       }
     });
@@ -706,7 +721,7 @@
     ev.preventDefault();
     const url = `/admin/api/event`;
     const fileInput = document.getElementById("addFilePathFile");
-    document.getElementById("uploadProgress").innerHTML = "";
+    document.getElementById("addUploadProgress").innerHTML = "";
 
     if(fileInput.value){
 
@@ -721,7 +736,7 @@
           body: formData
         }).then(res => res.json());
         */
-        let result = await uploadFileWithProgress(file).then(res => JSON.parse(res));
+        let result = await uploadFileWithProgress(file, 'addUploadProgress').then(res => JSON.parse(res));
 
         console.log({result});
         if(result && result.filepath){
@@ -755,7 +770,7 @@
             text: res.message || "Something went wrong",
             icon: "error"
           });
-      document.getElementById("uploadProgress").innerHTML = "";
+      document.getElementById("addUploadProgress").innerHTML = "";
       return;
     }
 
@@ -777,10 +792,41 @@
   });
 
 
-  editForm.addEventListener("submit", (ev) => {
+  editForm.addEventListener("submit",async (ev) => {
     ev.preventDefault();
     const id = document.getElementById("editEventId").value
     const url = `/admin/api/event?id=` + id;
+
+
+    const fileInput = document.getElementById("editFilePathFile");
+    document.getElementById("editUploadProgress").innerHTML = "";
+
+    if(fileInput.value){
+
+      // Get the file from the input
+      const file = fileInput.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        /*
+        const result = await fetch('/admin/api/upload', {
+          method: 'POST',
+          body: formData
+        }).then(res => res.json());
+        */
+        let result = await uploadFileWithProgress(file, 'editUploadProgress').then(res => JSON.parse(res));
+
+        console.log({result});
+        if(result && result.filepath){
+          fileInput.value = "";
+          document.getElementById("editFilePath").value = result.filepath;
+        }
+      }
+
+    }
+
+
+
     fetch(url, {
       method:"PUT",
       headers: { "content-type": "application/json" },
@@ -792,6 +838,7 @@
         start_time: document.getElementById("editStartTime").value,
         timezone: document.getElementById("editTimezone").value,
         filepath: document.getElementById("editFilePath").value,
+        status: +document.getElementById("editStatus").value,
       })
     })
     .then(res => res.json())
@@ -809,8 +856,15 @@
         text: "Event updated successfully",
         icon: "success"
       });
-      clearFieldData("editVersion");
-      clearFieldData("editName");
+      clearFieldData("editAgenda");
+      clearFieldData("editTitle");
+      clearFieldData("editDescription");
+      clearFieldData("editStartDate");
+      clearFieldData("editStartTime");
+      clearFieldData("editFilePath");
+      clearFieldData("editTimezone");
+      clearFieldData("editStatus");
+      document.getElementById("editUploadProgress").innerHTML = "";
       editFormModalCloseBtn.click();
       fetchData();
     });

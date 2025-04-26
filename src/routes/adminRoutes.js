@@ -7,6 +7,7 @@ const { dashboardView } = require("../controllers/admin/indexController");
 const authController = require("../controllers/admin/authController");
 const chatController = require("../controllers/admin/ChatController");
 const eventController = require("../controllers/admin/EventController");
+const meetingController = require("../controllers/admin/MeetingController");
 
 const uploadController = require("../controllers/admin/uploadController");
 const { upload } = require("../services/uploadService");
@@ -31,7 +32,7 @@ router.post("/api/chat", sessionMiddileware, chatController.addChat);
 router.put("/api/chat", sessionMiddileware, chatController.putChat);
 
 
-// BACKEND
+// EVENT
 router.get("/events", sessionMiddileware, eventController.eventView);
 router.get("/api/events", sessionMiddileware, eventController.getEvents);
 router.get("/api/event", sessionMiddileware, eventController.getEvent);
@@ -40,6 +41,14 @@ router.post("/api/event", sessionMiddileware, eventController.addEvent);
 router.put("/api/event", sessionMiddileware, eventController.putEvent);
 router.post("/api/startevent", sessionMiddileware, eventController.startEvent);
 
+
+// MEETING
+router.get("/meetings", sessionMiddileware, meetingController.meetingView);
+router.get("/api/meetings", sessionMiddileware, meetingController.getMeetings);
+router.get("/api/meeting", sessionMiddileware, meetingController.getMeeting);
+router.delete("/api/meeting", sessionMiddileware, meetingController.deleteMeeting);
+router.post("/api/meeting", sessionMiddileware, meetingController.addMeeting);
+router.put("/api/meeting", sessionMiddileware, meetingController.putMeeting);
 
 
 //CHAT

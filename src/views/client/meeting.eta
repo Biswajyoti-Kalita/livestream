@@ -222,9 +222,9 @@
           <video id="video" loop="false" muted controls autoplay class="max-h-[600px] w-full rounded-xl border border-nb-border video-shadow"></video>
           
           <!-- Video controls overlay can be added here if needed -->
-          <div class="mt-4 flex justify-between hidden items-center px-1">
+          <div class="mt-4 flex justify-between items-center px-1">
             <div class="text-sm text-nb-text-light">
-              <span class="text-nb-primary">Live Stream</span> • High Definition
+              <span class="text-nb-primary">Live Stream</span>
             </div>
             <div class="flex items-center space-x-2">
               <button class="p-2 rounded-full bg-nb-light hover:bg-gray-200 transition-colors text-nb-text-light">
@@ -310,17 +310,42 @@
           <p class="text-nb-text-light">Enter the meeting ID to connect</p>
         </div>
         <div class="space-y-4">
-          <form action="/client/meeting" id="joinForm">
-            <div>
-              <label for="meetingIdControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Meeting ID</label>
+          <form action="#" id="joinForm">
+            <div class="mb-3">
+              <label for="meetingIdControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Meeting ID <sup>*</sup></label>
               <input 
                 type="text" 
                 class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
                 id="meetingIdControlInput" 
                 placeholder="Enter meeting ID"
                 name="id"
+                required
               >
             </div>
+
+            <div class="mb-3">
+              <label for="organizationControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Organization</label>
+              <input 
+                type="text" 
+                class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
+                id="organizationControlInput" 
+                placeholder="Organization"
+                name="organization"
+              >
+            </div>
+
+            <div class="mb-3">
+              <label for="nameControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Your Name <sup>*</sup></label>
+              <input 
+                type="text" 
+                class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
+                id="nameControlInput" 
+                placeholder="Your Name"
+                name="your_name"
+                required
+              >
+            </div>
+
             <div class="flex items-center justify-between mt-6">
               <button 
                 class="nb-button w-full py-3 rounded-lg font-medium text-white flex items-center justify-center" 
@@ -349,6 +374,8 @@
     let isStreaming = false;
     let meetingData = null;
     let meetingStartTime = null;
+    let organization = "";
+    let your_name = "";
 
     // Get additional elements for mobile
     const videoTab = document.getElementById('videoTab');
@@ -494,6 +521,7 @@
             
             // Keep meeting info visible but also show stream
             document.getElementById("meetingInfoSection").classList.add("hidden");
+            document.getElementById("video").controls = false;
             showStreamDiv();
             getPreviousMessage(false);
             initializeChat(); // Connect to chat when meeting is active
@@ -509,6 +537,7 @@
             showStreamDiv();
             videoContainer.classList.remove('hidden');
             document.getElementById("streamInfo").classList.add("hidden");
+            document.getElementById("video").controls = true;
             getPublicPath();
             getPreviousMessage(true);            
             <% /* initializeChat(true); // Connect to chat when meeting is recorded */ %>
@@ -669,6 +698,39 @@
         const hls = new Hls();
         hls.loadSource(streamUrl);
         hls.attachMedia(video);
+        hls.config.liveSyncDuration = 3; // Keeps it close to the live edge
+        hls.config.maxBufferLength = 5;
+        hls.config.maxMaxBufferLength = 10;
+
+        hls.maxBufferSize= 2*1000*1000; // 2MB max buffer size
+        hls.maxBufferHole= 0.5;         // Maximum discontinuity
+        //liveSyncDuration: 3,        // Stay 3 seconds behind live
+        hls.liveMaxLatencyDuration= 10; // Max latency before seeking
+        hls.liveDurationInfinity= true; // Treat as a truly live stream
+        hls.enableWorker= true;         // Use web worker for better performance
+        hls.lowLatencyMode= true;  
+
+
+        hls.on(Hls.Events.LEVEL_LOADED, function() {
+          if(hls.currentLevel >= 0) {
+            const details = hls.levels[hls.currentLevel].details;
+            if (details && details.live) {
+              // Stay close to the live edge
+              const targetLatency = 4; // 4 seconds behind live edge
+              const currentLiveLatency = hls.latency || 0;
+              
+              if (currentLiveLatency > targetLatency + 5) {
+                // If we're more than 5 seconds beyond our target latency, seek forward
+                console.log(`Seeking to catch up to live, latency: ${currentLiveLatency.toFixed(2)}s`);
+                video.currentTime = video.duration - targetLatency;
+              }
+            }
+          }
+        });
+    
+      // Store hls instance for later use
+      window.hlsPlayer = hls;
+
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = streamUrl;
       }
@@ -682,8 +744,12 @@
       socket = io('/chat');
       
       // Join the meeting room
-      socket.emit('join_room', meetingId);
+      socket.emit('join_room', {meetingId, organization, name: your_name});
       
+      socket.on('event_ended', () => {
+        checkMeeting();
+      });
+
       // Listen for user count updates
       socket.on('users_update', (data) => {
         activeUsers = data.count;
@@ -773,7 +839,7 @@
         console.log("messages ",res, );
         if(res && res['messages'] && Array.isArray(res['messages']) && res['messages'].length){
           for(let i=0;i<res['messages'].length;i++){
-             addChatMessage(res['messages'][i]['user_uid'], res['messages'][i]['message'], new Date(res['messages'][i]['createdAt']))
+             addChatMessage( res['messages'][i]['name'] ? res['messages'][i]['name'] : res['messages'][i]['user_uid'], res['messages'][i]['message'], new Date(res['messages'][i]['createdAt']))
           }
         }
       });
@@ -841,15 +907,25 @@
     }
 
     // Call checkMeeting immediately to show meeting info
-    if(meetingId) {
+    /*if(meetingId) {
       checkMeeting();
       checkMeetingWithInterval();
-    }
+    }*/
+
+    <%
+      if(it.meeting && it.meeting.status == 2){
+    %>
+      checkMeeting();
+    <%
+      }
+    %>
 
     document.getElementById("joinForm").addEventListener("submit", (ev) => {
       ev.preventDefault();
       meetingId =  document.getElementById("meetingIdControlInput").value;
       meetingId = meetingId.trim();
+      organization = document.getElementById("organizationControlInput").value;
+      your_name = document.getElementById("nameControlInput").value;
       checkMeeting();
       checkMeetingWithInterval();
       document.getElementById("video").muted = false
