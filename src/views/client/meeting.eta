@@ -228,6 +228,7 @@
               height="360"
               class="hidden"
               id="customVideo"
+              style="width:100%;min-height:400px;"
               >
           </iframe>
           <video id="video" loop="false" muted controls autoplay class="max-h-[600px] w-full rounded-xl border border-nb-border video-shadow"></video>
@@ -532,6 +533,10 @@
             document.getElementById("customVideo").src= "https://livestream.umbrellasolution.in/embed/video";  
             document.getElementById("video").classList.add("hidden");
             
+
+            status.innerText = "";
+            videoContainer.classList.remove('hidden');
+
             // Keep meeting info visible but also show stream
             document.getElementById("meetingInfoSection").classList.add("hidden");
             document.getElementById("video").controls = false;
