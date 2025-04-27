@@ -219,8 +219,18 @@
         <div id="video-container" class="hidden">
           <img src="https://nextbroadcast.media/wp-content/uploads/2022/12/BROADCAST_BLACK.png" class="h-[50px]" />
 
+          <iframe 
+              src="http://your-owncast-server:8080/embed" 
+              frameborder="0" 
+              allow="autoplay; encrypted-media" 
+              allowfullscreen
+              width="640" 
+              height="360"
+              class="hidden"
+              id="customVideo"
+              >
+          </iframe>
           <video id="video" loop="false" muted controls autoplay class="max-h-[600px] w-full rounded-xl border border-nb-border video-shadow"></video>
-          
           <!-- Video controls overlay can be added here if needed -->
           <div class="mt-4 flex justify-between items-center px-1">
             <div class="text-sm text-nb-text-light">
@@ -517,7 +527,10 @@
             if(countdownTimer)
               clearInterval(countdownTimer);
             document.getElementById("timeRemainingSection").classList.add("hidden");
-            timer = setInterval(checkStream, intervalTimeout);
+            //timer = setInterval(checkStream, intervalTimeout);
+            document.getElementById("customVideo").classList.remove("hidden");
+            document.getElementById("customVideo").src= "/livestream/live/embed/video";  
+            document.getElementById("video").classList.add("hidden");
             
             // Keep meeting info visible but also show stream
             document.getElementById("meetingInfoSection").classList.add("hidden");
@@ -532,6 +545,10 @@
               clearInterval(countdownTimer);
             document.getElementById("timeRemainingSection").classList.add("hidden");
             
+            document.getElementById("customVideo").classList.add("hidden");
+            document.getElementById("customVideo").src= "";            
+            document.getElementById("video").classList.remove("hidden");
+
             // Keep meeting info visible but also show stream
             document.getElementById("meetingInfoSection").classList.add("hidden");
             showStreamDiv();

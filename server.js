@@ -8,7 +8,7 @@ const { server, app } = require("./src/services/websocketService");
 const session = require("express-session");
 
 
-require("./src/services/nsm");
+//require("./src/services/nsm");
 
 
 // Middleware
