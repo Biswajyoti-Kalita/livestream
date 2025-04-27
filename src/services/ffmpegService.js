@@ -9,7 +9,7 @@ module.exports = {
       const outputFilePath = path.join(__dirname, "..", "..",  "media", "live", event_uuid);
       await fs.mkdir(outputFilePath, { recursive: true });
       // const outputFile = path.join(outputFilePath, "index.m3u8")
-      const outputFile ="rtmp://localhost:1935/live/abc123"
+      const outputFile =`rtmp://localhost:1935/live/${process.env.STREAM_KEY}`;
       console.log({outputFilePath});
       const ffmpegArgs = [
         '-re',

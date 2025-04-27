@@ -529,7 +529,7 @@
             document.getElementById("timeRemainingSection").classList.add("hidden");
             //timer = setInterval(checkStream, intervalTimeout);
             document.getElementById("customVideo").classList.remove("hidden");
-            document.getElementById("customVideo").src= "/livestream/live/embed/video";  
+            document.getElementById("customVideo").src= "https://livestream.umbrellasolution.in/embed/video";  
             document.getElementById("video").classList.add("hidden");
             
             // Keep meeting info visible but also show stream
