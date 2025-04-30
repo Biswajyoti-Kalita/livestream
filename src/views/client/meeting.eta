@@ -681,8 +681,8 @@
             videoContainer.classList.remove('hidden');
 
             // Keep meeting info visible but also show stream
-            document.getElementById("meetingInfoSection").classList.add("hidden");
-            document.getElementById("video").controls = false;
+            //document.getElementById("meetingInfoSection").classList.add("hidden");
+            //document.getElementById("video").controls = false;
             showStreamDiv();
             getPreviousMessage(false);
             initializeChat(); // Connect to chat when meeting is active
@@ -711,6 +711,8 @@
     }
 
     function updateMeetingInfo(data) {
+
+
       // Update meeting info elements
       document.getElementById("meetingTitle").textContent = data.title || "Untitled Meeting";
       document.getElementById("meetingTitle2").textContent = data.title || "Untitled Meeting";
@@ -1091,7 +1093,7 @@
     }*/
 
     <%
-      if(it.meeting){
+      if(it.meeting && it.meeting.status == 2){
     %>
       checkMeeting();
     <%
@@ -1109,6 +1111,33 @@
       //document.getElementById("video").muted = false
       showMeetingInfoModal();
     });
+
+
+
+    function getMeetingInfo(){
+
+      fetch(`/client/event/${meetingId}`)
+        .then((res) => res.json())
+        .catch((err) => { return {status:"error"} })
+        .then((res) => {
+          console.log(res);
+          if(res["status"] === "error"){
+            //alert("Meeting not found");
+            return;
+          }
+          updateMeetingInfo(res);
+        });
+    
+    }
+
+    <%
+      if(it.meeting){
+    %>
+      getMeetingInfo();
+    <%
+      }
+    %>
+
 
     // Run on load and resize
     window.addEventListener('resize', setupMobileLayout);
