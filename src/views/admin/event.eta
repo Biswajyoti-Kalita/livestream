@@ -538,7 +538,8 @@
         socket = io('/chat');
       
       // Join the meeting room
-      socket.emit('join_room', meetingId);
+      <% /* socket.emit('join_room', meetingId); */ %>
+      socket.emit('join_room', {meetingId, organization: "NextBroadcastMedia", name: "NextBroadcastMedia"});
       
       // Listen for user count updates
       socket.on('users_update', (data) => {
@@ -629,12 +630,15 @@
     function sendMessage(){
       
       const message = messageInput.value.trim();
+      console.log("chat_message ", message, socket.connected);
       if (message && socket && socket.connected) {
         // Send via Socket.IO
         socket.emit('chat_message', { message: message, isAdmin: true });
         
         // Clear input after sending
         messageInput.value = '';
+      }else {
+        alert("message is empty or socket disconnected");
       }
     
     }

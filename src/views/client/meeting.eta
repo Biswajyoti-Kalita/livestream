@@ -39,6 +39,26 @@
     .hide {
       display: none !important;
     }
+
+    .gradient-text {
+      background: linear-gradient(45deg, #C33764, #2535B4);
+      color: transparent;
+      -webkit-background-clip: text;
+    }
+
+    .gradient-text-s {
+      background: linear-gradient(45deg, #37AAC3, #254DB4);
+      color: transparent;
+      -webkit-background-clip: text;
+    }
+
+    .color-p {
+      color: #101828;
+    }
+
+    .color-s {
+      color: #344054;
+    }
     
     .chat-collapsed {
       width: 60px !important;
@@ -110,7 +130,7 @@
     }
     /* Countdown timer */
     .countdown-item {
-      background: white;
+      background: #F6F6F6;
       border: 1px solid #E2E8F0;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
@@ -150,90 +170,60 @@
 </style>
   <!-- Add Socket.IO client library -->
   <script src="/socket.io/socket.io.js"></script>
+
+  <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
 </head>
-<body class="text-nb-text">
-  <div class="container-fluid mx-auto p-4">
-    <% /* <header class="mb-8 flex justify-center items-center">
-      <div class="flex items-center space-x-2">
-        <img src="https://nextbroadcast.media/wp-content/uploads/2022/12/BROADCAST_BLACK.png" class="h-[100px]" />
-        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nb-primary to-nb-accent">Nextbroadcast Media</h1>
-      </div>
-    </header> */ %>
-    <!-- Meeting Information Section -->
-    <div id="meetingInfoSection" class="hidden mb-8 bg-white rounded-xl p-6 max-w-3xl mx-auto border border-nb-border shadow-lg">
-      <h2 id="meetingTitle" class="text-2xl font-bold mb-2 text-nb-dark capitalize">Loading meeting...</h2>
-      <p id="meetingDescription" class="text-nb-text-light mb-6 capitalize">Please wait while we fetch the meeting details.</p>
-      <!-- Agenda will be dynamically inserted here when available -->
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <div class="bg-nb-light p-4 rounded-lg border border-nb-border">
-          <span class="text-nb-text-light text-sm">Start Date:</span>
-          <div id="meetingDate" class="font-semibold text-nb-text">-</div>
-        </div>
-        <div class="bg-nb-light p-4 rounded-lg border border-nb-border">
-          <span class="text-nb-text-light text-sm">Start Time:</span>
-          <div id="meetingTime" class="font-semibold text-nb-text">-</div>
-        </div>
-      </div>
-      
-      <!-- Improved Countdown Timer -->
-      <div id="timeRemainingSection" class="mt-8 text-center">
-        <h3 class="text-xl font-bold text-nb-dark mb-5">Starting In</h3>
-        <div class="flex justify-center gap-3 text-center">
-          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
-            <span id="remainingDays" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
-            <span class="text-sm text-nb-text-light mt-1">Days</span>
-          </div>
-          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
-            <span id="remainingHours" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
-            <span class="text-sm text-nb-text-light mt-1">Hours</span>
-          </div>
-          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
-            <span id="remainingMinutes" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
-            <span class="text-sm text-nb-text-light mt-1">Minutes</span>
-          </div>
-          <div class="countdown-item rounded-xl p-2 md:p-5 w-24">
-            <span id="remainingSeconds" class="text-lg md:text-3xl font-bold block text-nb-dark">00</span>
-            <span class="text-sm text-nb-text-light mt-1">Seconds</span>
-          </div>
-        </div>
-        <p class="mt-5 text-nb-text-light">The meeting will begin automatically when the countdown ends or when it starts.</p>
-      </div>
+<body class="text-nb-text bg-white">
+  <header class="mb-8 mt-8 pl-12 flex justify-start items-center md:absolute top-0">
+    <div class="flex items-center space-x-2">
+      <img src="/img/nbm.png" />
     </div>
+  </header>
+  <div class="w-full bg-white">
     <!-- Main Content Area with Flexbox Layout -->
-    <div class="flex flex-col md:flex-row gap-6" id="streamDiv">
-    <div class="mobile-tabs md:hidden w-full mb-4 border-b border-nb-border">
-      <button id="videoTab" class="w-1/2 p-3 text-center tab-active" onclick="showVideoTab()">
-        <i class="ri-video-line mr-1"></i> Video
-      </button>
-      <button id="chatTab" class="w-1/2 p-3 text-center" onclick="showChatTab()">
-        <i class="ri-chat-1-line mr-1"></i> Chat <span class="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full" id="mobileActiveUsers">0</span>
-      </button>
-    </div>
+    <div class="flex flex-col md:flex-row gap-6 p-8 mt-20" id="streamDiv">
+      <div class="mobile-tabs md:hidden w-full mb-4 border-b border-nb-border">
+        <button id="videoTab" class="w-1/2 p-3 text-center tab-active" onclick="showVideoTab()">
+          <i class="ri-video-line mr-1"></i> Video
+        </button>
+        <button id="chatTab" class="w-1/2 p-3 text-center" onclick="showChatTab()">
+          <i class="ri-chat-1-line mr-1"></i> Chat <span class="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full" id="mobileActiveUsers">0</span>
+        </button>
+      </div>
       <!-- Left Side - Video Section -->
       <div id="videoSection" class="w-full md:w-2/3 video-with-chat transition-all duration-300">
         <div id="streamInfo" class="mb-4 flex items-center">
-          <div class="w-3 h-3 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-          <div id="status" class="text-xl font-semibold text-nb-dark">Waiting for stream to begin...</div>
+          <% /* <div class="w-3 h-3 bg-blue-500 rounded-full mr-2 animate-pulse"></div> */ %>
+          <div id="status" style="display:none;" class="text-xl hidden font-semibold text-nb-dark">Waiting for stream to begin...</div>
         </div>
-        <div id="video-container" class="hidden">
-          <img src="https://nextbroadcast.media/wp-content/uploads/2022/12/BROADCAST_BLACK.png" class="h-[50px]" />
+        <div class="">
+          <h6 id="meetingTitle2" class="gradient-text text-md md:text-4xl"></h6>
+          <h6 id="meetingDescription2" class=" color-s text-sm md:text-base"></h6>
+        </div>
+        <div id="video-container" class="hidden mt-4">
+          <% /* <img src="https://nextbroadcast.media/wp-content/uploads/2022/12/BROADCAST_BLACK.png" class="h-[50px]" /> */ %>
+          <video 
+            id="video" 
+            loop="false" 
+            muted 
+            controls 
+            autoplay 
+            class="max-h-[600px] min-h-[450px]  w-full rounded-xl border border-nb-border video-shadow video-js"
+            preload="auto"
+            data-setup='{}'
+            >
+            
+          </video>
+          <div class="mt-4">
+            <h6 class="color-s text-md md:text-4xl font-bold">Agenda</h6>
+            <hr class="my-4" />
+            <p class=" text-base font-bold" id="meetingAgenda2">
 
-          <iframe 
-              src="http://your-owncast-server:8080/embed" 
-              frameborder="0" 
-              allow="autoplay; encrypted-media" 
-              allowfullscreen
-              width="640" 
-              height="360"
-              class="hidden"
-              id="customVideo"
-              style="width:100%;min-height:400px;"
-              >
-          </iframe>
-          <video id="video" loop="false" muted controls autoplay class="max-h-[600px] w-full rounded-xl border border-nb-border video-shadow"></video>
+            </p>
+          </div>
           <!-- Video controls overlay can be added here if needed -->
-          <div class="mt-4 flex justify-between items-center px-1">
+          <div class="mt-4 hidden flex justify-between items-center px-1">
             <div class="text-sm text-nb-text-light">
               <span class="text-nb-primary">Live Stream</span>
             </div>
@@ -308,71 +298,196 @@
       </div>
     </div>
     <!-- Meeting Join Form -->
-    <div id="nonStreamDiv" class="hidden mt-8">
-      <div class="max-w-md mx-auto bg-white rounded-xl p-8 border border-nb-border shadow-lg">
-        <div class="text-center mb-6">
-          <% /* <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-nb-primary to-nb-accent flex items-center justify-center mb-4 logo-pulse">
-            <i class="ri-live-line text-3xl text-white"></i>
-          </div> */ %>
-          <div class="flex justify-center">
-            <img src="https://nextbroadcast.media/wp-content/uploads/2022/12/BROADCAST_BLACK.png" class="h-[100px]" />
+    <div id="nonStreamDiv" class="hidden md:flex flex-row md:h-screen items-center">
+      <div class="p-8 basis-1/2">
+        <div class="max-w-md mx-auto h-full max-h-screen flex flex-col align-center">
+          <div class="mb-8">
+            <h2 class="mb-1 gradient-text text-4xl font-bold mb-2">Join Meeting</h2>
+            <p class="font-normal text-base">Enter the meeting ID to connect</p>
           </div>
-          <h2 class="text-2xl font-bold mb-1 text-nb-dark">Join Meeting</h2>
-          <p class="text-nb-text-light">Enter the meeting ID to connect</p>
+          <div class="space-y-4">
+            <form action="#" id="joinForm">
+              <div class="mb-2">
+                <label for="meetingIdControlInput" class="block font-normal text-base mb-2">Meeting ID <sup>*</sup></label>
+                <input 
+                  type="text" 
+                  class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
+                  id="meetingIdControlInput" 
+                  placeholder="Enter meeting ID"
+                  name="id"
+                  required
+                >
+              </div>
+
+              <div class="mb-2">
+                <label for="organizationControlInput" class="block font-normal text-base mb-2">Organization</label>
+                <input 
+                  type="text" 
+                  class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
+                  id="organizationControlInput" 
+                  placeholder="Organization"
+                  name="organization"
+                >
+              </div>
+
+              <div class="mb-2">
+                <label for="nameControlInput" class="block font-normal text-base mb-2">Your Name <sup>*</sup></label>
+                <input 
+                  type="text" 
+                  class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
+                  id="nameControlInput" 
+                  placeholder="Your Name"
+                  name="your_name"
+                  required
+                >
+              </div>
+
+              <div class="flex items-center justify-between mt-6">
+                <button 
+                  class="w-full py-3 bg-black rounded-lg font-medium text-white flex items-center justify-center" 
+                  type="submit"
+                >
+                  <i class="ri-login-circle-line mr-2"></i> Join Meeting
+                </button>
+              </div>
+              <div class="text-center mt-3">
+                <span id="meetingStatus" class="text-sm text-nb-text-light"></span>
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="space-y-4">
-          <form action="#" id="joinForm">
-            <div class="mb-3">
-              <label for="meetingIdControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Meeting ID <sup>*</sup></label>
-              <input 
-                type="text" 
-                class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
-                id="meetingIdControlInput" 
-                placeholder="Enter meeting ID"
-                name="id"
-                required
-              >
+      </div>
+      <div  class="basis-1/2 h-screen bg-light relative">
+        <%
+          if(it.meeting){
+        %>
+        <div class="blur-sm absolute top-0 left-0 w-full h-screen" style="background-image: url('/img/event-bg.png') "></div>
+        <%
+          }else {
+        %>
+        <div class="blur-sm absolute top-0 left-0 w-full h-screen" style="background: #F9FAFB "></div>        
+        <%
+          }
+        %>
+        <div class="w-full mx-auto p-12 absolute h-full max-h-screen flex flex-col justify-start items-center">
+          <%
+            if(it.meeting){
+          %>
+            <div class="mt-4 md:mt-8">
+              <h2 id="meetingTitle" class="text-3xl md:text-5xl font-bold mb-2 text-center capitalize" style="color: #FBE4CB"><%= it.meeting.title %></h2>
+              <p id="meetingDescription" class="text-lg md:text-2xl text-white mb-6 capitalize text-center"> <%= it.meeting.description %></p>
             </div>
+            <div>
+              <div class="border-2 border-white rounded-lg px-4 py-2 mt-12">
+                <h2 class="text-sm font-bold mb-2 capitalize text-white"> <span class="color-s">Agenda: </span> <span  id="meetingAgenda"><%= it.meeting.agenda %></span> </h2>              
+              </div>
+            </div>
+            <div class="mt-8 md:mt-auto">
+              <h6 class="text-white text-2xl text-center">When:</h6>
+              <div class=" grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="p-4 rounded-lg border border-nb-border">
+                  <span class="text-white text-sm">Start Date:</span>
+                  <div id="meetingDate" class="font-semibold text-nb-text" style="color: #F3AB5F;"></div>
+                </div>
+                <div class=" p-4 rounded-lg border border-nb-border">
+                  <span class="text-white text-sm">Start Time:</span>
+                  <div id="meetingTime" class="font-semibold text-nb-text"  style="color: #F3AB5F;">-</div>
+                </div>
+              </div>
+              
+            </div>
+          <%  
+            }else {
+          %>  
+            <div class="pt-12 flex flex-col ">
+              <h6 class="text-center font-bold text-4xl color-p mb-4">Welcome !</h6>
+              <img src="/img/background.png" class="w-full h-auto mb-4" />
+              <h6 class="text-center text-xl color-p">Welcome to NextBroadcastMedia - where media meets innvoation</h6>          
+            </div>
+          <%
+            }
+          %>
+        </div>
+      </div>
 
-            <div class="mb-3">
-              <label for="organizationControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Organization</label>
-              <input 
-                type="text" 
-                class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
-                id="organizationControlInput" 
-                placeholder="Organization"
-                name="organization"
-              >
-            </div>
+    </div>
+  </div>
 
-            <div class="mb-3">
-              <label for="nameControlInput" class="block text-sm font-medium mb-2 text-nb-text-light">Your Name <sup>*</sup></label>
-              <input 
-                type="text" 
-                class="w-full bg-nb-light rounded-lg p-3 text-nb-text focus:outline-none focus:ring-2 focus:ring-nb-primary border border-nb-border" 
-                id="nameControlInput" 
-                placeholder="Your Name"
-                name="your_name"
-                required
-              >
-            </div>
+  <div id="meetingInfoModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      <div class="relative rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 w-full flex justify-center">
+        <div>
+          <div class="mt-3 sm:mt-5">
+            <!-- Meeting Information Section -->
+            <div id="meetingInfoSection" class="mb-8 bg-white rounded-xl p-6 max-w-3xl mx-auto border border-nb-border shadow-lg">
+              <h2 class="text-xl md:text-4xl text-center font-bold mb-4 gradient-text-s capitalize">Your Event Starts Soon</h2>
 
-            <div class="flex items-center justify-between mt-6">
-              <button 
-                class="nb-button w-full py-3 rounded-lg font-medium text-white flex items-center justify-center" 
-                type="submit"
-              >
-                <i class="ri-login-circle-line mr-2"></i> Join Meeting
-              </button>
+              <!-- Improved Countdown Timer -->
+              <div id="timeRemainingSection" class="mt-8 text-center">
+                <div class="flex justify-center gap-1 md:gap-3 text-center">
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-24 shadow-xl">
+                    <span id="remainingDays" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
+                    <span class="text-sm color-s mt-1">Days</span>
+                  </div>
+
+                  <div class="flex flex-col justify-center align-center">
+                    <span class="gradient-text">:</span>
+                  </div>
+
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-24 shadow-xl">
+                    <span id="remainingHours" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
+                    <span class="text-sm color-s mt-1">Hours</span>
+                  </div>
+
+                  <div class="flex flex-col justify-center align-center">
+                    <span class="gradient-text">:</span>
+                  </div>
+
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-24 shadow-xl">
+                    <span id="remainingMinutes" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
+                    <span class="text-sm color-s mt-1">Minutes</span>
+                  </div>
+
+                  <div class="flex flex-col justify-center align-center">
+                    <span class="gradient-text">:</span>
+                  </div>
+
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-24 shadow-xl">
+                    <span id="remainingSeconds" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
+                    <span class="text-sm color-s mt-1">Seconds</span>
+                  </div>
+                </div>              
+              </div>
+              <div class="flex flex-row mt-8 gap-4 justify-around px-20 md:px-4">
+                <div class="max-w-xs">
+                  <p class="color-p text-md md:text-2xl font-bold">
+                    The meeting will begin automatically when the countdown ends or when it starts.
+                  </p>
+                  <button 
+                    class="px-2 md:px-3 py-2 md:py-3 bg-black mt-4 rounded-md font-medium text-white flex gap-2 items-center justify-center font-base text-sm md:text-lg" 
+                    onclick="hideMeetingInfoModal()"                  
+                  >
+                  
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.521 7.83331L8.18766 12.5L7.00016 13.6666L0.333496 6.99998L7.00016 0.333313L8.18766 1.49998L3.521 6.16665H13.6668V7.83331H3.521Z" fill="white"/>
+                    </svg>
+                      Go Back
+                  </button>
+                </div>
+                <div class=" text-end">
+                  <img src="/img/modal-icon.png" class="w-auto h-auto" />
+                </div>
+              </div>
+              
+
             </div>
-            <div class="text-center mt-3">
-              <span id="meetingStatus" class="text-sm text-nb-text-light"></span>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 
   <script>
     // Existing JavaScript
@@ -387,6 +502,10 @@
     let meetingStartTime = null;
     let organization = "";
     let your_name = "";
+    const meetingInfoModal = document.getElementById('meetingInfoModal');
+
+    const player = videojs('video');
+
 
     // Get additional elements for mobile
     const videoTab = document.getElementById('videoTab');
@@ -412,6 +531,27 @@
     let activeUsers = 0; // Initial count
     let socket; // WebSocket connection
     let intervalTimeout = 5000;
+
+
+
+    player.on('play', () => {
+      if(player.src().endsWith('m3u8')){      
+        const seekable = player.seekable();
+        if (seekable && seekable.length > 0) {
+          const liveEdge = seekable.end(0);
+          player.currentTime(liveEdge);
+        }
+      }
+    });
+
+
+    function showMeetingInfoModal(){
+      meetingInfoModal.classList.remove('hidden');
+    }
+
+    function hideMeetingInfoModal(){
+      meetingInfoModal.classList.add('hidden');
+    }
 
 
     // Mobile tab switching functions
@@ -491,7 +631,12 @@
       fetch(`/client/event/public?id=${meetingId}`).then(res => res.json()).then(res => {
         console.log(res);
         if(res.filepath){
-          document.getElementById("video").src = res.filepath;
+          //document.getElementById("video").src = res.filepath;
+          player.src({ src: res.filepath });
+          player.play().catch(err => {
+            console.warn('Autoplay error:', err);
+          });
+
         }
       });
     }
@@ -511,29 +656,27 @@
           }
           meetingData = res;
           updateMeetingInfo(res);
-          document.getElementById("nonStreamDiv").classList.add("hidden");
-          const status = parseInt(res['status']);
+          //document.getElementById("nonStreamDiv").classList.add("hidden");
+          const status =  parseInt(res['status']);
           if(status == 0){
             console.log("meeting has not yet started");
-            document.getElementById("meetingStatus").innerHTML = `Meeting has not yet started`;
+            //document.getElementById("meetingStatus").innerHTML = `Meeting has not yet started`;
             showMeetingCountdown(res);
             
             // Show meeting info section but hide stream
-            document.getElementById("meetingInfoSection").classList.remove("hidden");
-            document.getElementById("streamDiv").classList.add("hidden");
+            //document.getElementById("meetingInfoSection").classList.remove("hidden");
+            //document.getElementById("streamDiv").classList.add("hidden");
             //showNonStreamDiv();
           } else if(status == 1) {
+
+            hideMeetingInfoModal();
+
             if(meetingTimer)
               clearInterval(meetingTimer);
             if(countdownTimer)
               clearInterval(countdownTimer);
-            document.getElementById("timeRemainingSection").classList.add("hidden");
-            //timer = setInterval(checkStream, intervalTimeout);
-            document.getElementById("customVideo").classList.remove("hidden");
-            document.getElementById("customVideo").src= "https://livestream.umbrellasolution.in/embed/video";  
-            document.getElementById("video").classList.add("hidden");
-            
-
+            document.getElementById("nonStreamDiv").style.display = "none";
+            timer = setInterval(checkStream, intervalTimeout);            
             status.innerText = "";
             videoContainer.classList.remove('hidden');
 
@@ -548,18 +691,15 @@
               clearInterval(meetingTimer);
             if(countdownTimer)
               clearInterval(countdownTimer);
-            document.getElementById("timeRemainingSection").classList.add("hidden");
-            
-            document.getElementById("customVideo").classList.add("hidden");
-            document.getElementById("customVideo").src= "";            
-            document.getElementById("video").classList.remove("hidden");
-
+            //document.getElementById("timeRemainingSection").classList.add("hidden");
             // Keep meeting info visible but also show stream
-            document.getElementById("meetingInfoSection").classList.add("hidden");
+            document.getElementById("nonStreamDiv").style.display = "none";
+
+            //document.getElementById("meetingInfoSection").classList.add("hidden");
             showStreamDiv();
             videoContainer.classList.remove('hidden');
             document.getElementById("streamInfo").classList.add("hidden");
-            document.getElementById("video").controls = true;
+            //document.getElementById("video").controls = true;
             getPublicPath();
             getPreviousMessage(true);            
             <% /* initializeChat(true); // Connect to chat when meeting is recorded */ %>
@@ -573,14 +713,18 @@
     function updateMeetingInfo(data) {
       // Update meeting info elements
       document.getElementById("meetingTitle").textContent = data.title || "Untitled Meeting";
+      document.getElementById("meetingTitle2").textContent = data.title || "Untitled Meeting";
       document.getElementById("meetingDescription").textContent = data.description || "No description available";
+      document.getElementById("meetingDescription2").textContent = data.description || "No description available";
+      document.getElementById("meetingAgenda").textContent = data.agenda || "";
+      document.getElementById("meetingAgenda2").textContent = data.agenda || "";
       
       // Add agenda if available
       if (data.agenda) {
         const agendaElement = document.getElementById("meetingAgenda") || document.createElement("p");
-        agendaElement.id = "meetingAgenda";
-        agendaElement.className = "text-gray-600 mt-2";
-        agendaElement.innerHTML = `<strong>Agenda:</strong> ${data.agenda}`;
+        //agendaElement.id = "meetingAgenda";
+        //agendaElement.className = "text-gray-600 mt-2";
+        //agendaElement.innerHTML = `<strong>Agenda:</strong> ${data.agenda}`;
         
         // If element doesn't exist yet, add it after the description
         if (!document.getElementById("meetingAgenda")) {
@@ -670,7 +814,7 @@
 
       if( diff.days > 0 || diff.hours > 0 || diff.minutes > 30 ){
         if(intervalTimeout === 5000){
-          intervalTimeout = 1000 * 60 * 60;
+          intervalTimeout = 10000;
           checkMeetingWithInterval();
         }
       }else {
@@ -690,33 +834,37 @@
     }
 
     function checkStream() {
-      streamUrl = `/live/${meetingId}/index.m3u8`;
+
+      streamUrl =  location.hostname == "localhost" ? "http://localhost:8080/hls/stream.m3u8" :  "https://livestream.umbrellasolution.in/hls/stream.m3u8";
+
+      //streamUrl = `/live/${meetingId}/index.m3u8`;
       fetch(streamUrl, { method: 'HEAD' })
         .then(res => {
           if (res.ok && !isStreaming) {
-            status.innerText = "";
+            //status.innerText = "";
             videoContainer.classList.remove('hidden');
             startPlayer();
             isStreaming = true;
             clearInterval(timer);
           } else if (!res.ok && isStreaming) {
-            status.innerText = "⚫ Stream ended.";
+            //status.innerText = "⚫ Stream ended.";
             videoContainer.classList.add('hidden');
             isStreaming = false;
             clearInterval(timer);
           } else if (!res.ok) {
-            status.innerText = "🔵 Waiting for stream...";
+            //status.innerText = "🔵 Waiting for stream...";
           }
         })
         .catch(err => {
-          status.innerText = "⚫ Offline or unreachable.";
+          console.log(err);
+          //status.innerText = "⚫ Offline or unreachable.";
           videoContainer.classList.add('hidden');
           isStreaming = false;
         });
     }
 
     function startPlayer() {
-      if (Hls.isSupported()) {
+      <% /* if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(streamUrl);
         hls.attachMedia(video);
@@ -755,8 +903,16 @@
 
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = streamUrl;
-      }
-      video.play();
+      } */ %>
+      //video.src = streamUrl;
+
+      //video.play();
+      player.controlBar.playToggle.hide();
+      player.src({ src: streamUrl, type: 'application/x-mpegURL' });
+      player.play().catch(err => {
+        console.warn('Autoplay error:', err);
+      });
+
     }
 
     // Initialize WebSocket connection for chat
@@ -935,7 +1091,7 @@
     }*/
 
     <%
-      if(it.meeting && it.meeting.status == 2){
+      if(it.meeting){
     %>
       checkMeeting();
     <%
@@ -950,7 +1106,8 @@
       your_name = document.getElementById("nameControlInput").value;
       checkMeeting();
       checkMeetingWithInterval();
-      document.getElementById("video").muted = false
+      //document.getElementById("video").muted = false
+      showMeetingInfoModal();
     });
 
     // Run on load and resize
