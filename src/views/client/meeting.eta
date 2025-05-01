@@ -385,11 +385,11 @@
             <div class="mt-8 md:mt-auto">
               <h6 class="text-white text-2xl text-center">When:</h6>
               <div class=" grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div class="p-4 rounded-lg border border-nb-border">
+                <div class="p-4 rounded-lg border border-nb-border" style="background: url('/img/date-bg.png');">
                   <span class="text-white text-sm">Start Date:</span>
                   <div id="meetingDate" class="font-semibold text-nb-text" style="color: #F3AB5F;"></div>
                 </div>
-                <div class=" p-4 rounded-lg border border-nb-border">
+                <div class=" p-4 rounded-lg border border-nb-border" style="background: url('/img/date-bg.png');">
                   <span class="text-white text-sm">Start Time:</span>
                   <div id="meetingTime" class="font-semibold text-nb-text"  style="color: #F3AB5F;">-</div>
                 </div>
