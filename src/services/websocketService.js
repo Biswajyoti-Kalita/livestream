@@ -51,13 +51,43 @@ chatNamespace.on('connection', (socket) => {
     
   });
   
+
+  socket.on("remove_message" , (messageId) => {
+
+    console.log("remove_message ", messageId, meetingId)
+    if (!meetingId) return;
+
+    // Broadcast message to all users in the room
+    chatNamespace.to(meetingId).emit('delete_message', messageId);
+    
+    db.chat.destroy({
+      where: {
+        id: messageId,
+        meeting_id: meetingId,
+      }
+    }).then((res) => {
+      console.log(res);
+    })
+
+  })
+
+  socket.on("refresh_message" , () => {
+    console.log(" refresh_message ");
+    if (!meetingId) return;
+
+    // Broadcast message to all users in the room
+    chatNamespace.to(meetingId).emit('refresh_message');
+
+  })
+
+
   // Handle chat messages
-  socket.on('chat_message', (data) => {
+  socket.on('chat_message',async (data) => {
     if (!meetingId) return;
     
     const userDetails = getUserDetails(userId);
 
-    db.chat.create({
+    const newChat = await db.chat.create({
       message: data.message,
       meeting_id: meetingId,
       user_uid: data.isAdmin ? "Admin" : username,
@@ -65,7 +95,7 @@ chatNamespace.on('connection', (socket) => {
       organization: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['organization']) ? userDetails['organization']: '',
       is_admin: data.isAdmin ? true : false,
       user_id: userId,
-    }).then(res => console.log("message added ")).catch(err => console.log(err));
+    }).catch(err => console.log(err));
 
 
 
@@ -74,7 +104,8 @@ chatNamespace.on('connection', (socket) => {
       username: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['name']) ? userDetails['name']: username,
       organization: data.isAdmin ? "NextBroadcastMedia" :  (userDetails && userDetails['organization']) ? userDetails['organization']: '',
       message: data.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      id: newChat ? newChat['id'] : ''
     });
   });
   

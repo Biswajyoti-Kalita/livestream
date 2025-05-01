@@ -636,6 +636,7 @@
           player.play().catch(err => {
             console.warn('Autoplay error:', err);
           });
+          player.muted(false)
 
         }
       });
@@ -914,7 +915,7 @@
       player.play().catch(err => {
         console.warn('Autoplay error:', err);
       });
-
+      player.muted(false)
     }
 
     // Initialize WebSocket connection for chat
@@ -937,10 +938,20 @@
         collapsedActiveUsers.textContent = activeUsers;
         mobileActiveUsers.textContent = activeUsers; // Update mobile tab counter
       });
+
+
+      socket.on("delete_message", (id) => {
+
+        const checkExist = document.getElementById("messageElement" + id);
+        if(checkExist){
+          checkExist.style.display = "none";
+        }
+
+      });
       
       // Listen for chat messages
       socket.on('chat_message', (data) => {
-        addChatMessage(data.username, data.message, data.timestamp);
+        addChatMessage(data.username, data.message, data.timestamp, data['id']);
         
 
         <% /* // If chat is collapsed and we receive a message, flash the chat icon
@@ -1019,17 +1030,19 @@
         console.log("messages ",res, );
         if(res && res['messages'] && Array.isArray(res['messages']) && res['messages'].length){
           for(let i=0;i<res['messages'].length;i++){
-             addChatMessage( res['messages'][i]['name'] ? res['messages'][i]['name'] : res['messages'][i]['user_uid'], res['messages'][i]['message'], new Date(res['messages'][i]['createdAt']))
+             addChatMessage( res['messages'][i]['name'] ? res['messages'][i]['name'] : res['messages'][i]['user_uid'], res['messages'][i]['message'], new Date(res['messages'][i]['createdAt']), res['messages'][i]['id'])
           }
         }
       });
     }
 
     // Add a chat message to the UI
-    function addChatMessage(username, message, timestamp) {
-      console.log("addChatMessage ", {username, message, timestamp});
+    function addChatMessage(username, message, timestamp, id) {
+      console.log("addChatMessage ", {username, message, timestamp, id});
       const messageElement = document.createElement('div');
       messageElement.className = 'message bg-zinc-200 p-3 rounded-lg mb-2';
+      if(id)
+        messageElement.id = 'messageElement'+ id;
       
       const time = new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       
