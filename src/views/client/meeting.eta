@@ -247,8 +247,8 @@
         
         <!-- Chat Header -->
         <div id="chatHeader" class="flex justify-between items-center p-4 border-b border-nb-border">
-          <h2 class="text-xl font-bold text-nb-dark">Live Chat</h2>
-          <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-sm flex items-center">
+          <h2 class="text-xl font-bold text-nb-dark" id="chatHeaderTitle">Live Chat</h2>
+          <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-sm flex items-center" id="activeUsersDiv">
             <i class="ri-user-line mr-1"></i>
             <span id="activeUsers" class="mr-1">0</span> active
           </div>
@@ -281,7 +281,7 @@
                 class="nb-button px-4 py-2 rounded-lg flex items-center text-white"
                 id="messageSendBtn"
               >
-                <i class="ri-send-plane-fill mr-1"></i> Send
+                <i class="ri-send-plane-fill mr-1"></i> <span class="hidden md:block">Send</span>
               </button>
             </form>
           </div>
@@ -1020,12 +1020,19 @@
         //document.getElementById("messageForm").classList.add("hidden");    
         document.getElementById("messageInput").disabled = true;
         document.getElementById("messageSendBtn").disabled = true;
+        document.getElementById("chatHeaderTitle").innerHTML = "Chat History";
+        document.getElementById("activeUsersDiv").style.display = "none";
+        document.getElementById("messageForm").style.display="none"
       }else {
         //document.getElementById("messageForm").classList.remove("hidden");
         document.getElementById("messageInput").disabled = false;
         document.getElementById("messageSendBtn").disabled = false;
-
+        document.getElementById("chatHeaderTitle").innerHTML = "Live Chat";
+        document.getElementById("activeUsersDiv").style.display = "";
+        document.getElementById("messageForm").style.display=""
       }
+
+      chatMessages.innerHTML = '';
 
       fetch("/client/api/messages/"+meetingId).then((res) => res.json()).then(res => {
         console.log("messages ",res, );
