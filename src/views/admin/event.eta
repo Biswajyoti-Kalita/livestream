@@ -685,21 +685,55 @@
     
     }
 
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-  function addUser(){
+  async function addUser(){
     const url = `/admin/api/adduser`;
-    fetch(url, {
-      method:"POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        meetingId,
-        num: +document.getElementById("addUserRoomNum").value
-      })
-    })
-    .then(res => res.json())
-    .then(res => {
-        document.getElementById("addUserRoomNum").value = 0;
-    })
+
+    const count = +document.getElementById("addUserRoomNum").value;
+
+    if(count > 0){
+    
+      for(let i=1; i<= count; i++){
+        await fetch(url, {
+          method:"POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            meetingId,
+            num: 1
+          })
+        })
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById("addUserRoomNum").value = 0;
+        })
+
+
+         await delay(200);
+      }
+
+    }else {
+      
+      for(let i=1; i<= count * -1; i++){
+        await fetch(url, {
+          method:"POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            meetingId,
+            num: -1
+          })
+        })
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById("addUserRoomNum").value = 0;
+        })
+
+        await delay(100)
+      }
+    }
+    
   }
 
 
