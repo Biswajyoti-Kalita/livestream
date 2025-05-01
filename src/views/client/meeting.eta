@@ -426,7 +426,7 @@
               <!-- Improved Countdown Timer -->
               <div id="timeRemainingSection" class="mt-8 text-center">
                 <div class="flex justify-center gap-1 md:gap-3 text-center">
-                  <div class="countdown-item rounded-xl p-2 md:p-5 w-16 shadow-xl">
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-16 md:w-24 shadow-xl">
                     <span id="remainingDays" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
                     <span class="text-sm color-s mt-1">Days</span>
                   </div>
@@ -435,7 +435,7 @@
                     <span class="gradient-text">:</span>
                   </div>
 
-                  <div class="countdown-item rounded-xl p-2 md:p-5 w-16 shadow-xl">
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-16 md:w-24 shadow-xl">
                     <span id="remainingHours" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
                     <span class="text-sm color-s mt-1">Hours</span>
                   </div>
@@ -444,7 +444,7 @@
                     <span class="gradient-text">:</span>
                   </div>
 
-                  <div class="countdown-item rounded-xl p-2 md:p-5 w-16 shadow-xl">
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-16   md:w-24 shadow-xl">
                     <span id="remainingMinutes" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
                     <span class="text-sm color-s mt-1">Minutes</span>
                   </div>
@@ -453,7 +453,7 @@
                     <span class="gradient-text">:</span>
                   </div>
 
-                  <div class="countdown-item rounded-xl p-2 md:p-5 w-20 shadow-xl">
+                  <div class="countdown-item rounded-xl p-2 md:p-5 w-20  md:w-24 shadow-xl">
                     <span id="remainingSeconds" class="text-lg md:text-3xl font-bold block gradient-text">00</span>
                     <span class="text-sm color-s mt-1">Seconds</span>
                   </div>
