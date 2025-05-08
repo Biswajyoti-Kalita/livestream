@@ -209,7 +209,7 @@
             muted 
             controls 
             autoplay 
-            class="max-h-[600px] min-h-[450px]  w-full rounded-xl border border-nb-border video-shadow video-js"
+            class="max-h-[500px] min-h-[450px]  w-full rounded-xl border border-nb-border video-shadow video-js"
             preload="auto"
             data-setup='{}'
             >
