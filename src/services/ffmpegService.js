@@ -20,16 +20,17 @@ module.exports = {
         '-b:v', '1500k',
         '-maxrate', '1500k',
         '-bufsize', '3000k',
-        '-vf', 'scale=1280:-2',
+        '-vf', 'scale=1280:-2',   // scales to 720p or similar, keeping aspect ratio
+        '-g', '50',               // keyframe interval for 25fps (~2s)
         '-c:a', 'aac',
         '-ar', '44100',
         '-b:a', '128k',
         '-pix_fmt', 'yuv420p',
-        '-g', '50',
         '-f', 'flv',
         outputFile,
       ];      
-    
+      
+
       const ffmpeg = spawn(ffmpegPath, ffmpegArgs);
     
       ffmpeg.stdout.on('data', (data) => {
