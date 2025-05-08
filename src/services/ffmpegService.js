@@ -15,16 +15,20 @@ module.exports = {
         '-re',
         '-i', inputFile,
         '-c:v', 'libx264',
-        '-preset', 'veryfast',
+        '-preset', 'ultrafast',
         '-tune', 'zerolatency',
+        '-b:v', '1500k',
+        '-maxrate', '1500k',
+        '-bufsize', '3000k',
+        '-vf', 'scale=1280:-2',
         '-c:a', 'aac',
-        '-ar', '44100',        // optional: standard audio sampling rate
-        '-b:a', '128k',        // optional: standard audio bitrate
-        '-pix_fmt', 'yuv420p', // ensures compatibility
-        '-g', '50',            // keyframes every 2 seconds for 25fps
+        '-ar', '44100',
+        '-b:a', '128k',
+        '-pix_fmt', 'yuv420p',
+        '-g', '50',
         '-f', 'flv',
-        outputFile,            // RTMP URL (e.g., rtmp://your-ip:1935/live/streamKey)
-      ];
+        outputFile,
+      ];      
     
       const ffmpeg = spawn(ffmpegPath, ffmpegArgs);
     
